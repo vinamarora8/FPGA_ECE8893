@@ -21,65 +21,151 @@ void complex_matmul(
 
 #pragma HLS interface s_axilite port=return
 
-    int MatA_real[M][N], MatA_imag[M][N];
-    int MatB_real[N][K], MatB_imag[N][K];
-    int MatC_real[M][K], MatC_imag[M][K];
+    // Internal cache BRAMs, not complete matrices
+    int_t MatA[M][N];
+    int_t MatB[N][K];
+    int_t MatC[M][K];
 
-#pragma HLS ARRAY_RESHAPE variable=MatA_real complete dim=2
-#pragma HLS ARRAY_RESHAPE variable=MatA_imag complete dim=2
-#pragma HLS ARRAY_RESHAPE variable=MatB_real complete dim=1
-#pragma HLS ARRAY_RESHAPE variable=MatB_imag complete dim=1
+#pragma HLS ARRAY_RESHAPE variable=MatA complete dim=2
+#pragma HLS ARRAY_RESHAPE variable=MatB complete dim=1
 
+    /** C_real **/
+    /* A_real * B_real */
 
-    // Read in the data (Matrix A) from DRAM to BRAM
-    MAT_A_ROWS:
+    MAT_A_ROWS_R1:
     for(int i = 0; i < M; i++) {
-        MAT_A_COLS:
+        MAT_A_COLS_R1:
         for(int j = 0; j < N; j++) {
-            MatA_real[i][j] = MatA_DRAM[i][j].real;
-            MatA_imag[i][j] = MatA_DRAM[i][j].imag;
+            MatA[i][j] = MatA_DRAM[i][j].real;
         }
     }
 
-    // Read in the data (Matrix B) from DRAM to BRAM
-    MAT_B_ROWS:
+    MAT_B_ROWS_R1:
     for(int i = 0; i < N; i++) {
-        MAT_B_COLS:
+        MAT_B_COLS_R1:
         for(int j = 0; j < K; j++) {
-            MatB_real[i][j] = MatB_DRAM[i][j].real;
-            MatB_imag[i][j] = MatB_DRAM[i][j].imag;
+            MatB[i][j] = MatB_DRAM[i][j].real;
         }
     }
 
-
-    // Perform matrix multiplication
-    OUTER_ROWS:
+    OUTER_ROWS_RR:
     for(int i = 0; i < M; i++) {
-        OUTER_COLS:
+        OUTER_COLS_RR:
         for(int j = 0; j < K; j++) {
             #pragma HLS PIPELINE II=1
-            INNER_ROW_COL:
-            int cij_real = 0;
-            int cij_imag = 0;
+            INNER_ROW_COL_RR:
+            int_t cijLocal = 0;
             for(int p = 0; p < N; p++) {
-                cij_real +=   MatA_real[i][p] * MatB_real[p][j];
-                cij_real += - MatA_imag[i][p] * MatB_imag[p][j];
-
-                cij_imag +=   MatA_real[i][p] * MatB_imag[p][j];
-                cij_imag +=   MatA_imag[i][p] * MatB_real[p][j];
+                cijLocal += MatA[i][p] * MatB[p][j];
             }
-            MatC_real[i][j] = cij_real;
-            MatC_imag[i][j] = cij_imag;
+            MatC[i][j] = cijLocal;
+        }
+    }
+
+
+    /* A_imag * B_imag */
+
+    MAT_A_ROWS_I1:
+    for(int i = 0; i < M; i++) {
+        MAT_A_COLS_I1:
+        for(int j = 0; j < N; j++) {
+            MatA[i][j] = MatA_DRAM[i][j].imag;
+        }
+    }
+
+    MAT_B_ROWS_I1:
+    for(int i = 0; i < N; i++) {
+        MAT_B_COLS_I1:
+        for(int j = 0; j < K; j++) {
+            MatB[i][j] = MatB_DRAM[i][j].imag;
+        }
+    }
+
+    OUTER_ROWS_II:
+    for(int i = 0; i < M; i++) {
+        OUTER_COLS_II:
+        for(int j = 0; j < K; j++) {
+            #pragma HLS PIPELINE II=1
+            INNER_ROW_COL_II:
+            int_t cijLocal = 0;
+            for(int p = 0; p < N; p++) {
+                cijLocal += MatA[i][p] * MatB[p][j];
+            }
+            MatC[i][j] -= cijLocal;
         }
     }
 
     // Write back the data from BRAM to DRAM
-    MAT_C_ROWS:
     for(int i = 0; i < M; i++) {
-        MAT_C_COLS:
         for(int j = 0; j < K; j++) {
-            MatC_DRAM[i][j].real = MatC_real[i][j];
-            MatC_DRAM[i][j].imag = MatC_imag[i][j];
+            MatC_DRAM[i][j].real = MatC[i][j];
+        }
+    }
+
+
+    /** C_imag **/
+    /* A_imag * B_real */
+
+    MAT_B_ROWS_R2:
+    for(int i = 0; i < N; i++) {
+        MAT_B_COLS_R2:
+        for(int j = 0; j < K; j++) {
+            MatB[i][j] = MatB_DRAM[i][j].real;
+        }
+    }
+
+    OUTER_ROWS_IR:
+    for(int i = 0; i < M; i++) {
+        OUTER_COLS_IR:
+        for(int j = 0; j < K; j++) {
+            #pragma HLS PIPELINE II=1
+            INNER_ROW_COL_IR:
+            int_t cijLocal = 0;
+            for(int p = 0; p < N; p++) {
+                cijLocal += MatA[i][p] * MatB[p][j];
+            }
+            MatC[i][j] = cijLocal;
+        }
+    }
+
+    /* A_real * B_imag */
+
+    MAT_A_ROWS_R2:
+    for(int i = 0; i < M; i++) {
+        MAT_A_COLS_R2:
+        for(int j = 0; j < N; j++) {
+            MatA[i][j] = MatA_DRAM[i][j].real;
+        }
+    }
+
+    MAT_B_ROWS_I2:
+    for(int i = 0; i < N; i++) {
+        MAT_B_COLS_I2:
+        for(int j = 0; j < K; j++) {
+            MatB[i][j] = MatB_DRAM[i][j].imag;
+        }
+    }
+
+    OUTER_ROWS_RI:
+    for(int i = 0; i < M; i++) {
+        OUTER_COLS_RI:
+        for(int j = 0; j < K; j++) {
+            #pragma HLS PIPELINE II=1
+            INNER_ROW_COL_RI:
+            int_t cijLocal = 0;
+            for(int p = 0; p < N; p++) {
+                cijLocal += MatA[i][p] * MatB[p][j];
+            }
+            MatC[i][j] += cijLocal;
+        }
+    }
+
+    // Write back the data from BRAM to DRAM
+    MAT_C_ROWS_I:
+    for(int i = 0; i < M; i++) {
+        MAT_C_COLS_I:
+        for(int j = 0; j < K; j++) {
+            MatC_DRAM[i][j].imag = MatC[i][j];
         }
     }
 
