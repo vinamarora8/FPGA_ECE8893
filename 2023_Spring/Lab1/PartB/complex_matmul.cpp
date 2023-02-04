@@ -61,16 +61,13 @@ void complex_matmul(
         OUTER_COLS:
         for(int j = 0; j < K; j++) {
             INNER_ROW_COL:
-            complex_t cijLocal = {0, 0};
             for(int p = 0; p < N; p++) {
-                cijLocal.real +=   MatA[i][p].real * MatB[p][j].real;
-                cijLocal.real += - MatA[i][p].imag * MatB[p][j].imag;
+                MatC[i][j].real +=   MatA[i][p].real * MatB[p][j].real;
+                MatC[i][j].real += - MatA[i][p].imag * MatB[p][j].imag;
 
-                cijLocal.imag +=   MatA[i][p].real * MatB[p][j].imag;
-                cijLocal.imag +=   MatA[i][p].imag * MatB[p][j].real;
+                MatC[i][j].imag +=   MatA[i][p].real * MatB[p][j].imag;
+                MatC[i][j].imag +=   MatA[i][p].imag * MatB[p][j].real;
             }
-            MatC[i][j] = cijLocal;
-
         }
     }
 
