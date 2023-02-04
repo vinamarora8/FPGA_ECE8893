@@ -13,16 +13,13 @@
 #include <stdlib.h>
 
 #include <ap_int.h>
+#include "macros.h"
 
 typedef ap_int<16> real_t;
 
-#define M 100
-#define N 150
-#define K 200
-
-void real_matmul( 
-    real_t MatA_DRAM[M][N], 
-    real_t MatB_DRAM[N][K], 
+void real_matmul(
+    real_t MatA_DRAM[M][N],
+    real_t MatB_DRAM[N][K],
     real_t MatC_DRAM[M][K]
 );
 
