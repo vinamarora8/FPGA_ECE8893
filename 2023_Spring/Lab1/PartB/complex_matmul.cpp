@@ -21,19 +21,23 @@ void complex_matmul(
 
 #pragma HLS interface s_axilite port=return
 
-    // TODO: Insert your code here
-    // You may follow a similar style as in real_matmul.cpp
+    int MatA_real[M][N], MatA_imag[M][N];
+    int MatB_real[N][K], MatB_imag[N][K];
+    int MatC_real[M][K], MatC_imag[M][K];
 
-    complex_t MatA[M][N];
-    complex_t MatB[N][K];
-    complex_t MatC[M][K];
+#pragma HLS ARRAY_RESHAPE variable=MatA_real complete dim=2
+#pragma HLS ARRAY_RESHAPE variable=MatA_imag complete dim=2
+#pragma HLS ARRAY_RESHAPE variable=MatB_real complete dim=1
+#pragma HLS ARRAY_RESHAPE variable=MatB_imag complete dim=1
+
 
     // Read in the data (Matrix A) from DRAM to BRAM
     MAT_A_ROWS:
     for(int i = 0; i < M; i++) {
         MAT_A_COLS:
         for(int j = 0; j < N; j++) {
-            MatA[i][j] = MatA_DRAM[i][j];
+            MatA_real[i][j] = MatA_DRAM[i][j].real;
+            MatA_imag[i][j] = MatA_DRAM[i][j].imag;
         }
     }
 
@@ -42,32 +46,30 @@ void complex_matmul(
     for(int i = 0; i < N; i++) {
         MAT_B_COLS:
         for(int j = 0; j < K; j++) {
-            MatB[i][j] = MatB_DRAM[i][j];
+            MatB_real[i][j] = MatB_DRAM[i][j].real;
+            MatB_imag[i][j] = MatB_DRAM[i][j].imag;
         }
     }
 
-    // Initialize product matrix C
-    MAT_C_ROWS_INIT:
-    for(int i = 0; i < M; i++) {
-        MAT_C_COLS_INIT:
-        for(int j = 0; j < K; j++) {
-            MatC[i][j] = {0, 0};
-        }
-    }
 
     // Perform matrix multiplication
     OUTER_ROWS:
     for(int i = 0; i < M; i++) {
         OUTER_COLS:
         for(int j = 0; j < K; j++) {
+            #pragma HLS PIPELINE II=1
             INNER_ROW_COL:
+            int cij_real = 0;
+            int cij_imag = 0;
             for(int p = 0; p < N; p++) {
-                MatC[i][j].real +=   MatA[i][p].real * MatB[p][j].real;
-                MatC[i][j].real += - MatA[i][p].imag * MatB[p][j].imag;
+                cij_real +=   MatA_real[i][p] * MatB_real[p][j];
+                cij_real += - MatA_imag[i][p] * MatB_imag[p][j];
 
-                MatC[i][j].imag +=   MatA[i][p].real * MatB[p][j].imag;
-                MatC[i][j].imag +=   MatA[i][p].imag * MatB[p][j].real;
+                cij_imag +=   MatA_real[i][p] * MatB_imag[p][j];
+                cij_imag +=   MatA_imag[i][p] * MatB_real[p][j];
             }
+            MatC_real[i][j] = cij_real;
+            MatC_imag[i][j] = cij_imag;
         }
     }
 
@@ -76,7 +78,8 @@ void complex_matmul(
     for(int i = 0; i < M; i++) {
         MAT_C_COLS:
         for(int j = 0; j < K; j++) {
-            MatC_DRAM[i][j] = MatC[i][j];
+            MatC_DRAM[i][j].real = MatC_real[i][j];
+            MatC_DRAM[i][j].imag = MatC_imag[i][j];
         }
     }
 
