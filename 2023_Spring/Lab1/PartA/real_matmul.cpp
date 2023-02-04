@@ -46,15 +46,6 @@ void real_matmul(
         }
     }
 
-    // Initialize product matrix C
-    MAT_C_ROWS_INIT:
-    for(int i = 0; i < M; i++) {
-        MAT_C_COLS_INIT:
-        for(int j = 0; j < K; j++) {
-            MatC[i][j] = 0;
-        }
-    }
-
     // Perform matrix multiplication
     OUTER_ROWS:
     for(int i = 0; i < M; i++) {
@@ -62,6 +53,7 @@ void real_matmul(
         for(int j = 0; j < K; j++) {
             #pragma HLS PIPELINE II=1
             INNER_ROW_COL:
+
             int cijLocal = 0;
             for(int p = 0; p < N; p++) {
                 cijLocal += MatA[i][p] * MatB[p][j];
