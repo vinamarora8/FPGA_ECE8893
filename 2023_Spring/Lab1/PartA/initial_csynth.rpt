@@ -1,0 +1,208 @@
+
+
+================================================================
+== Synthesis Summary Report of 'real_matmul'
+================================================================
++ General Information: 
+    * Date:           Fri Feb  3 19:57:06 2023
+    * Version:        2022.1.2 (Build 3605665 on Fri Aug  5 22:52:02 MDT 2022)
+    * Project:        real_proj
+    * Solution:       solution1 (Vivado IP Flow Target)
+    * Product family: zynq
+    * Target device:  xc7z020-clg400-1
+    
+
++ Performance & Resource Estimates: 
+    
+    PS: '+' for module; 'o' for loop; '*' for dataflow
+    +---------------------------------------------------------+------+------+---------+-----------+----------+---------+-------+----------+----------+---------+-----------+-----------+-----+
+    |                         Modules                         | Issue|      | Latency |  Latency  | Iteration|         |  Trip |          |          |         |           |           |     |
+    |                         & Loops                         | Type | Slack| (cycles)|    (ns)   |  Latency | Interval| Count | Pipelined|   BRAM   |   DSP   |     FF    |    LUT    | URAM|
+    +---------------------------------------------------------+------+------+---------+-----------+----------+---------+-------+----------+----------+---------+-----------+-----------+-----+
+    |+ real_matmul                                            |     -|  0.00|  3310041|  3.310e+07|         -|  3310042|      -|        no|  80 (28%)|   6 (2%)|  1912 (1%)|  3433 (6%)|    -|
+    | + real_matmul_Pipeline_MAT_A_ROWS_MAT_A_COLS            |     -|  0.00|    15004|  1.500e+05|         -|    15004|      -|        no|         -|  1 (~0%)|   70 (~0%)|  171 (~0%)|    -|
+    |  o MAT_A_ROWS_MAT_A_COLS                                |     -|  7.30|    15002|  1.500e+05|         4|        1|  15000|       yes|         -|        -|          -|          -|    -|
+    | + real_matmul_Pipeline_MAT_C_ROWS_INIT_MAT_C_COLS_INIT  |     -|  1.00|    20004|  2.000e+05|         -|    20004|      -|        no|         -|  1 (~0%)|   53 (~0%)|  161 (~0%)|    -|
+    |  o MAT_C_ROWS_INIT_MAT_C_COLS_INIT                      |     -|  7.30|    20002|  2.000e+05|         4|        1|  20000|       yes|         -|        -|          -|          -|    -|
+    | + real_matmul_Pipeline_MAT_B_ROWS_MAT_B_COLS            |     -|  0.00|    30004|  3.000e+05|         -|    30004|      -|        no|         -|  1 (~0%)|   72 (~0%)|  176 (~0%)|    -|
+    |  o MAT_B_ROWS_MAT_B_COLS                                |     -|  7.30|    30002|  3.000e+05|         4|        1|  30000|       yes|         -|        -|          -|          -|    -|
+    | + real_matmul_Pipeline_MAT_C_ROWS_MAT_C_COLS            |     -|  0.00|    20006|  2.001e+05|         -|    20006|      -|        no|         -|  1 (~0%)|  138 (~0%)|  204 (~0%)|    -|
+    |  o MAT_C_ROWS_MAT_C_COLS                                |     -|  7.30|    20004|  2.000e+05|         6|        1|  20000|       yes|         -|        -|          -|          -|    -|
+    | o OUTER_ROWS_OUTER_COLS                                 |     -|  7.30|  3240000|  3.240e+07|       162|        -|  20000|        no|         -|        -|          -|          -|    -|
+    |  + real_matmul_Pipeline_INNER_ROW_COL                   |     -|  1.95|      155|  1.550e+03|         -|      155|      -|        no|         -|  1 (~0%)|  208 (~0%)|  232 (~0%)|    -|
+    |   o INNER_ROW_COL                                       |     -|  7.30|      153|  1.530e+03|         5|        1|    150|       yes|         -|        -|          -|          -|    -|
+    +---------------------------------------------------------+------+------+---------+-----------+----------+---------+-------+----------+----------+---------+-----------+-----------+-----+
+
+
+================================================================
+== HW Interfaces
+================================================================
+* M_AXI
++-----------+------------+---------------+---------+--------+----------+-----------+--------------+--------------+-------------+-------------+
+| Interface | Data Width | Address Width | Latency | Offset | Register | Max Widen | Max Read     | Max Write    | Num Read    | Num Write   |
+|           | (SW->HW)   |               |         |        |          | Bitwidth  | Burst Length | Burst Length | Outstanding | Outstanding |
++-----------+------------+---------------+---------+--------+----------+-----------+--------------+--------------+-------------+-------------+
+| m_axi_mem | 16 -> 16   | 64            | 0       | slave  | 0        | 0         | 16           | 16           | 16          | 16          |
++-----------+------------+---------------+---------+--------+----------+-----------+--------------+--------------+-------------+-------------+
+
+* S_AXILITE Interfaces
++---------------+------------+---------------+--------+----------+
+| Interface     | Data Width | Address Width | Offset | Register |
++---------------+------------+---------------+--------+----------+
+| s_axi_control | 32         | 6             | 16     | 0        |
++---------------+------------+---------------+--------+----------+
+
+* S_AXILITE Registers
++---------------+-------------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+| Interface     | Register    | Offset | Width | Access | Description                      | Bit Fields                                                           |
++---------------+-------------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+| s_axi_control | CTRL        | 0x00   | 32    | RW     | Control signals                  | 0=AP_START 1=AP_DONE 2=AP_IDLE 3=AP_READY 7=AUTO_RESTART 9=INTERRUPT |
+| s_axi_control | GIER        | 0x04   | 32    | RW     | Global Interrupt Enable Register | 0=Enable                                                             |
+| s_axi_control | IP_IER      | 0x08   | 32    | RW     | IP Interrupt Enable Register     | 0=CHAN0_INT_EN 1=CHAN1_INT_EN                                        |
+| s_axi_control | IP_ISR      | 0x0c   | 32    | RW     | IP Interrupt Status Register     | 0=CHAN0_INT_ST 1=CHAN1_INT_ST                                        |
+| s_axi_control | MatA_DRAM_1 | 0x10   | 32    | W      | Data signal of MatA_DRAM         |                                                                      |
+| s_axi_control | MatA_DRAM_2 | 0x14   | 32    | W      | Data signal of MatA_DRAM         |                                                                      |
+| s_axi_control | MatB_DRAM_1 | 0x1c   | 32    | W      | Data signal of MatB_DRAM         |                                                                      |
+| s_axi_control | MatB_DRAM_2 | 0x20   | 32    | W      | Data signal of MatB_DRAM         |                                                                      |
+| s_axi_control | MatC_DRAM_1 | 0x28   | 32    | W      | Data signal of MatC_DRAM         |                                                                      |
+| s_axi_control | MatC_DRAM_2 | 0x2c   | 32    | W      | Data signal of MatC_DRAM         |                                                                      |
++---------------+-------------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+
+* TOP LEVEL CONTROL
++-----------+------------+-----------+
+| Interface | Type       | Ports     |
++-----------+------------+-----------+
+| ap_clk    | clock      | ap_clk    |
+| ap_rst_n  | reset      | ap_rst_n  |
+| interrupt | interrupt  | interrupt |
+| ap_ctrl   | ap_ctrl_hs |           |
++-----------+------------+-----------+
+
+
+================================================================
+== SW I/O Information
+================================================================
+* Top Function Arguments
++-----------+-----------+-------------+
+| Argument  | Direction | Datatype    |
++-----------+-----------+-------------+
+| MatA_DRAM | inout     | ap_int<16>* |
+| MatB_DRAM | inout     | ap_int<16>* |
+| MatC_DRAM | inout     | ap_int<16>* |
++-----------+-----------+-------------+
+
+* SW-to-HW Mapping
++-----------+---------------+-----------+----------+---------------------------------------+
+| Argument  | HW Interface  | HW Type   | HW Usage | HW Info                               |
++-----------+---------------+-----------+----------+---------------------------------------+
+| MatA_DRAM | m_axi_mem     | interface |          |                                       |
+| MatA_DRAM | s_axi_control | register  | offset   | name=MatA_DRAM_1 offset=0x10 range=32 |
+| MatA_DRAM | s_axi_control | register  | offset   | name=MatA_DRAM_2 offset=0x14 range=32 |
+| MatB_DRAM | m_axi_mem     | interface |          |                                       |
+| MatB_DRAM | s_axi_control | register  | offset   | name=MatB_DRAM_1 offset=0x1c range=32 |
+| MatB_DRAM | s_axi_control | register  | offset   | name=MatB_DRAM_2 offset=0x20 range=32 |
+| MatC_DRAM | m_axi_mem     | interface |          |                                       |
+| MatC_DRAM | s_axi_control | register  | offset   | name=MatC_DRAM_1 offset=0x28 range=32 |
+| MatC_DRAM | s_axi_control | register  | offset   | name=MatC_DRAM_2 offset=0x2c range=32 |
++-----------+---------------+-----------+----------+---------------------------------------+
+
+
+================================================================
+== M_AXI Burst Information
+================================================================
+ Note: All burst requests might be further partitioned into multiple requests during RTL generation based on max_read_burst_length or max_write_burst_length settings.
+
+* Inferred Burst Summary
++--------------+------------+-----------+--------+-------+----------------------+
+| HW Interface | Loop       | Direction | Length | Width | Location             |
++--------------+------------+-----------+--------+-------+----------------------+
+| m_axi_mem    | MAT_A_ROWS | read      | 15000  | 16    | real_matmul.cpp:29:5 |
+| m_axi_mem    | MAT_B_ROWS | read      | 30000  | 16    | real_matmul.cpp:38:5 |
+| m_axi_mem    | MAT_C_ROWS | write     | 20000  | 16    | real_matmul.cpp:70:5 |
++--------------+------------+-----------+--------+-------+----------------------+
+
+* Inferred Bursts and Widening Missed
++--------------+-----------+------------+-------------------------------------------------------------------------------------------------------+------------+----------------------+
+| HW Interface | Variable  | Loop       | Problem                                                                                               | Resolution | Location             |
++--------------+-----------+------------+-------------------------------------------------------------------------------------------------------+------------+----------------------+
+| m_axi_mem    | MatC_DRAM | MAT_C_COLS | Could not widen since type i16 size is greater than or equal to the max_widen_bitwidth threshold of 0 | 214-353    | real_matmul.cpp:72:9 |
+| m_axi_mem    | MatB_DRAM | MAT_B_COLS | Could not widen since type i16 size is greater than or equal to the max_widen_bitwidth threshold of 0 | 214-353    | real_matmul.cpp:40:9 |
+| m_axi_mem    | MatA_DRAM | MAT_A_COLS | Could not widen since type i16 size is greater than or equal to the max_widen_bitwidth threshold of 0 | 214-353    | real_matmul.cpp:31:9 |
++--------------+-----------+------------+-------------------------------------------------------------------------------------------------------+------------+----------------------+
+
+    * Resolution URL: www.xilinx.com/cgi-bin/docs/rdoc?v=2022.1;t=hls+guidance;d=XXX-YYY.html (replace XXX-YYY with column value)
+
+================================================================
+== Bind Op Report
+================================================================
++---------------------------------------------------------+-----+--------+-------------+-----+--------+---------+
+| Name                                                    | DSP | Pragma | Variable    | Op  | Impl   | Latency |
++---------------------------------------------------------+-----+--------+-------------+-----+--------+---------+
+| + real_matmul                                           | 6   |        |             |     |        |         |
+|   add_ln56_1_fu_288_p2                                  | -   |        | add_ln56_1  | add | fabric | 0       |
+|   add_ln56_fu_300_p2                                    | -   |        | add_ln56    | add | fabric | 0       |
+|   mul_7ns_9ns_14_1_1_U27                                | -   |        | mul_ln232   | mul | auto   | 0       |
+|   mac_muladd_7ns_8ns_8ns_15_4_1_U28                     | 1   |        | empty_25    | mul | dsp48  | 3       |
+|   mac_muladd_7ns_8ns_8ns_15_4_1_U28                     | 1   |        | empty_26    | add | dsp48  | 3       |
+|   add_ln58_fu_332_p2                                    | -   |        | add_ln58    | add | fabric | 0       |
+|  + real_matmul_Pipeline_MAT_A_ROWS_MAT_A_COLS           | 1   |        |             |     |        |         |
+|    add_ln29_1_fu_128_p2                                 | -   |        | add_ln29_1  | add | fabric | 0       |
+|    add_ln29_fu_140_p2                                   | -   |        | add_ln29    | add | fabric | 0       |
+|    mac_muladd_7ns_8ns_8ns_14_4_1_U1                     | 1   |        | mul_ln32    | mul | dsp48  | 3       |
+|    mac_muladd_7ns_8ns_8ns_14_4_1_U1                     | 1   |        | add_ln32    | add | dsp48  | 3       |
+|    add_ln31_fu_172_p2                                   | -   |        | add_ln31    | add | fabric | 0       |
+|  + real_matmul_Pipeline_MAT_C_ROWS_INIT_MAT_C_COLS_INIT | 1   |        |             |     |        |         |
+|    add_ln47_1_fu_94_p2                                  | -   |        | add_ln47_1  | add | fabric | 0       |
+|    add_ln47_fu_106_p2                                   | -   |        | add_ln47    | add | fabric | 0       |
+|    mac_muladd_7ns_8ns_8ns_15_4_1_U11                    | 1   |        | mul_ln50    | mul | dsp48  | 3       |
+|    mac_muladd_7ns_8ns_8ns_15_4_1_U11                    | 1   |        | add_ln50    | add | dsp48  | 3       |
+|    add_ln49_fu_138_p2                                   | -   |        | add_ln49    | add | fabric | 0       |
+|  + real_matmul_Pipeline_MAT_B_ROWS_MAT_B_COLS           | 1   |        |             |     |        |         |
+|    add_ln38_1_fu_124_p2                                 | -   |        | add_ln38_1  | add | fabric | 0       |
+|    add_ln38_fu_136_p2                                   | -   |        | add_ln38    | add | fabric | 0       |
+|    mac_muladd_8ns_8ns_8ns_15_4_1_U6                     | 1   |        | mul_ln41    | mul | dsp48  | 3       |
+|    mac_muladd_8ns_8ns_8ns_15_4_1_U6                     | 1   |        | add_ln41    | add | dsp48  | 3       |
+|    add_ln40_fu_168_p2                                   | -   |        | add_ln40    | add | fabric | 0       |
+|  + real_matmul_Pipeline_INNER_ROW_COL                   | 1   |        |             |     |        |         |
+|    add_ln61_fu_158_p2                                   | -   |        | add_ln61    | add | fabric | 0       |
+|    add_ln232_fu_171_p2                                  | -   |        | add_ln232   | add | fabric | 0       |
+|    add_ln232_2_fu_182_p2                                | -   |        | add_ln232_2 | add | fabric | 0       |
+|    add_ln232_1_fu_188_p2                                | -   |        | add_ln232_1 | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U14                   | 1   |        | mul_ln886   | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U14                   | 1   |        | add_ln886   | add | dsp48  | 3       |
+|  + real_matmul_Pipeline_MAT_C_ROWS_MAT_C_COLS           | 1   |        |             |     |        |         |
+|    add_ln70_1_fu_133_p2                                 | -   |        | add_ln70_1  | add | fabric | 0       |
+|    add_ln70_fu_145_p2                                   | -   |        | add_ln70    | add | fabric | 0       |
+|    mac_muladd_7ns_8ns_8ns_15_4_1_U23                    | 1   |        | mul_ln73    | mul | dsp48  | 3       |
+|    mac_muladd_7ns_8ns_8ns_15_4_1_U23                    | 1   |        | add_ln73    | add | dsp48  | 3       |
+|    add_ln72_fu_177_p2                                   | -   |        | add_ln72    | add | fabric | 0       |
++---------------------------------------------------------+-----+--------+-------------+-----+--------+---------+
+
+
+================================================================
+== Bind Storage Report
+================================================================
++---------------+------+------+--------+----------+---------+------+---------+
+| Name          | BRAM | URAM | Pragma | Variable | Storage | Impl | Latency |
++---------------+------+------+--------+----------+---------+------+---------+
+| + real_matmul | 80   | 0    |        |          |         |      |         |
+|   MatA_V_U    | 16   | -    |        | MatA_V   | ram_1p  | auto | 1       |
+|   MatB_V_U    | 32   | -    |        | MatB_V   | ram_1p  | auto | 1       |
+|   MatC_V_U    | 32   | -    |        | MatC_V   | ram_1p  | auto | 1       |
++---------------+------+------+--------+----------+---------+------+---------+
+
+
+================================================================
+== Pragma Report
+================================================================
+* Valid Pragma Syntax
++-----------+------------------------------------------------------+----------------------------------------------+
+| Type      | Options                                              | Location                                     |
++-----------+------------------------------------------------------+----------------------------------------------+
+| interface | m_axi depth=1 port=MatA_DRAM offset=slave bundle=mem | real_matmul.cpp:17 in real_matmul, MatA_DRAM |
+| interface | m_axi depth=1 port=MatB_DRAM offset=slave bundle=mem | real_matmul.cpp:18 in real_matmul, MatB_DRAM |
+| interface | m_axi depth=1 port=MatC_DRAM offset=slave bundle=mem | real_matmul.cpp:19 in real_matmul, MatC_DRAM |
+| interface | s_axilite port=return                                | real_matmul.cpp:21 in real_matmul, return    |
++-----------+------------------------------------------------------+----------------------------------------------+
+
+

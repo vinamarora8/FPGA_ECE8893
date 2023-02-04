@@ -9,9 +9,9 @@
 
 #include "real.h"
 
-void real_matmul( 
-    real_t MatA_DRAM[M][N], 
-    real_t MatB_DRAM[N][K], 
+void real_matmul(
+    real_t MatA_DRAM[M][N],
+    real_t MatB_DRAM[N][K],
     real_t MatC_DRAM[M][K])
 {
 #pragma HLS interface m_axi depth=1 port=MatA_DRAM offset=slave bundle=mem
@@ -19,10 +19,14 @@ void real_matmul(
 #pragma HLS interface m_axi depth=1 port=MatC_DRAM offset=slave bundle=mem
 
 #pragma HLS interface s_axilite port=return
-    
+
     real_t MatA[M][N];
     real_t MatB[N][K];
     real_t MatC[M][K];
+
+#pragma HLS ARRAY_RESHAPE variable=MatA complete dim=2
+#pragma HLS ARRAY_RESHAPE variable=MatB complete dim=1
+
 
     // Read in the data (Matrix A) from DRAM to BRAM
     MAT_A_ROWS:
@@ -51,16 +55,18 @@ void real_matmul(
         }
     }
 
-    // Perform matrix multiplication 
+    // Perform matrix multiplication
     OUTER_ROWS:
     for(int i = 0; i < M; i++) {
         OUTER_COLS:
         for(int j = 0; j < K; j++) {
-            
+            #pragma HLS PIPELINE II=1
             INNER_ROW_COL:
+            int cijLocal = 0;
             for(int p = 0; p < N; p++) {
-                MatC[i][j] += MatA[i][p] * MatB[p][j];
+                cijLocal += MatA[i][p] * MatB[p][j];
             }
+            MatC[i][j] = cijLocal;
 
         }
     }

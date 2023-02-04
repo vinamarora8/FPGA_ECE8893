@@ -1,0 +1,456 @@
+
+
+================================================================
+== Synthesis Summary Report of 'real_matmul'
+================================================================
++ General Information: 
+    * Date:           Fri Feb  3 19:58:27 2023
+    * Version:        2022.1.2 (Build 3605665 on Fri Aug  5 22:52:02 MDT 2022)
+    * Project:        real_proj
+    * Solution:       solution1 (Vivado IP Flow Target)
+    * Product family: zynq
+    * Target device:  xc7z020-clg400-1
+    
+
++ Performance & Resource Estimates: 
+    
+    PS: '+' for module; 'o' for loop; '*' for dataflow
+    +---------------------------------------------------------+------+------+---------+-----------+----------+---------+-------+----------+-----------+-----------+-----------+-------------+-----+
+    |                         Modules                         | Issue|      | Latency |  Latency  | Iteration|         |  Trip |          |           |           |           |             |     |
+    |                         & Loops                         | Type | Slack| (cycles)|    (ns)   |  Latency | Interval| Count | Pipelined|   BRAM    |    DSP    |     FF    |     LUT     | URAM|
+    +---------------------------------------------------------+------+------+---------+-----------+----------+---------+-------+----------+-----------+-----------+-----------+-------------+-----+
+    |+ real_matmul                                            |     -|  0.00|    90052|  9.005e+05|         -|    90053|      -|        no|  233 (83%)|  153 (69%)|  7263 (6%)|  13588 (25%)|    -|
+    | + real_matmul_Pipeline_MAT_A_ROWS_MAT_A_COLS            |     -|  0.00|    15003|  1.500e+05|         -|    15003|      -|        no|          -|          -|   59 (~0%)|    3490 (6%)|    -|
+    |  o MAT_A_ROWS_MAT_A_COLS                                |     -|  7.30|    15001|  1.500e+05|         3|        1|  15000|       yes|          -|          -|          -|            -|    -|
+    | + real_matmul_Pipeline_MAT_C_ROWS_INIT_MAT_C_COLS_INIT  |     -|  1.00|    20004|  2.000e+05|         -|    20004|      -|        no|          -|    1 (~0%)|   53 (~0%)|    161 (~0%)|    -|
+    |  o MAT_C_ROWS_INIT_MAT_C_COLS_INIT                      |     -|  7.30|    20002|  2.000e+05|         4|        1|  20000|       yes|          -|          -|          -|            -|    -|
+    | + real_matmul_Pipeline_MAT_B_ROWS_MAT_B_COLS            |     -|  0.00|    30003|  3.000e+05|         -|    30003|      -|        no|          -|          -|   68 (~0%)|    3495 (6%)|    -|
+    |  o MAT_B_ROWS_MAT_B_COLS                                |     -|  7.30|    30001|  3.000e+05|         3|        1|  30000|       yes|          -|          -|          -|            -|    -|
+    | + real_matmul_Pipeline_OUTER_ROWS_OUTER_COLS            |     -|  0.14|    20012|  2.001e+05|         -|    20012|      -|        no|          -|  151 (68%)|  5734 (5%)|    3940 (7%)|    -|
+    |  o OUTER_ROWS_OUTER_COLS                                |     -|  7.30|    20010|  2.001e+05|        12|        1|  20000|       yes|          -|          -|          -|            -|    -|
+    | + real_matmul_Pipeline_MAT_C_ROWS_MAT_C_COLS            |     -|  0.00|    20006|  2.001e+05|         -|    20006|      -|        no|          -|    1 (~0%)|  138 (~0%)|    204 (~0%)|    -|
+    |  o MAT_C_ROWS_MAT_C_COLS                                |     -|  7.30|    20004|  2.000e+05|         6|        1|  20000|       yes|          -|          -|          -|            -|    -|
+    +---------------------------------------------------------+------+------+---------+-----------+----------+---------+-------+----------+-----------+-----------+-----------+-------------+-----+
+
+
+================================================================
+== HW Interfaces
+================================================================
+* M_AXI
++-----------+------------+---------------+---------+--------+----------+-----------+--------------+--------------+-------------+-------------+
+| Interface | Data Width | Address Width | Latency | Offset | Register | Max Widen | Max Read     | Max Write    | Num Read    | Num Write   |
+|           | (SW->HW)   |               |         |        |          | Bitwidth  | Burst Length | Burst Length | Outstanding | Outstanding |
++-----------+------------+---------------+---------+--------+----------+-----------+--------------+--------------+-------------+-------------+
+| m_axi_mem | 16 -> 16   | 64            | 0       | slave  | 0        | 0         | 16           | 16           | 16          | 16          |
++-----------+------------+---------------+---------+--------+----------+-----------+--------------+--------------+-------------+-------------+
+
+* S_AXILITE Interfaces
++---------------+------------+---------------+--------+----------+
+| Interface     | Data Width | Address Width | Offset | Register |
++---------------+------------+---------------+--------+----------+
+| s_axi_control | 32         | 6             | 16     | 0        |
++---------------+------------+---------------+--------+----------+
+
+* S_AXILITE Registers
++---------------+-------------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+| Interface     | Register    | Offset | Width | Access | Description                      | Bit Fields                                                           |
++---------------+-------------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+| s_axi_control | CTRL        | 0x00   | 32    | RW     | Control signals                  | 0=AP_START 1=AP_DONE 2=AP_IDLE 3=AP_READY 7=AUTO_RESTART 9=INTERRUPT |
+| s_axi_control | GIER        | 0x04   | 32    | RW     | Global Interrupt Enable Register | 0=Enable                                                             |
+| s_axi_control | IP_IER      | 0x08   | 32    | RW     | IP Interrupt Enable Register     | 0=CHAN0_INT_EN 1=CHAN1_INT_EN                                        |
+| s_axi_control | IP_ISR      | 0x0c   | 32    | RW     | IP Interrupt Status Register     | 0=CHAN0_INT_ST 1=CHAN1_INT_ST                                        |
+| s_axi_control | MatA_DRAM_1 | 0x10   | 32    | W      | Data signal of MatA_DRAM         |                                                                      |
+| s_axi_control | MatA_DRAM_2 | 0x14   | 32    | W      | Data signal of MatA_DRAM         |                                                                      |
+| s_axi_control | MatB_DRAM_1 | 0x1c   | 32    | W      | Data signal of MatB_DRAM         |                                                                      |
+| s_axi_control | MatB_DRAM_2 | 0x20   | 32    | W      | Data signal of MatB_DRAM         |                                                                      |
+| s_axi_control | MatC_DRAM_1 | 0x28   | 32    | W      | Data signal of MatC_DRAM         |                                                                      |
+| s_axi_control | MatC_DRAM_2 | 0x2c   | 32    | W      | Data signal of MatC_DRAM         |                                                                      |
++---------------+-------------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+
+* TOP LEVEL CONTROL
++-----------+------------+-----------+
+| Interface | Type       | Ports     |
++-----------+------------+-----------+
+| ap_clk    | clock      | ap_clk    |
+| ap_rst_n  | reset      | ap_rst_n  |
+| interrupt | interrupt  | interrupt |
+| ap_ctrl   | ap_ctrl_hs |           |
++-----------+------------+-----------+
+
+
+================================================================
+== SW I/O Information
+================================================================
+* Top Function Arguments
++-----------+-----------+-------------+
+| Argument  | Direction | Datatype    |
++-----------+-----------+-------------+
+| MatA_DRAM | inout     | ap_int<16>* |
+| MatB_DRAM | inout     | ap_int<16>* |
+| MatC_DRAM | inout     | ap_int<16>* |
++-----------+-----------+-------------+
+
+* SW-to-HW Mapping
++-----------+---------------+-----------+----------+---------------------------------------+
+| Argument  | HW Interface  | HW Type   | HW Usage | HW Info                               |
++-----------+---------------+-----------+----------+---------------------------------------+
+| MatA_DRAM | m_axi_mem     | interface |          |                                       |
+| MatA_DRAM | s_axi_control | register  | offset   | name=MatA_DRAM_1 offset=0x10 range=32 |
+| MatA_DRAM | s_axi_control | register  | offset   | name=MatA_DRAM_2 offset=0x14 range=32 |
+| MatB_DRAM | m_axi_mem     | interface |          |                                       |
+| MatB_DRAM | s_axi_control | register  | offset   | name=MatB_DRAM_1 offset=0x1c range=32 |
+| MatB_DRAM | s_axi_control | register  | offset   | name=MatB_DRAM_2 offset=0x20 range=32 |
+| MatC_DRAM | m_axi_mem     | interface |          |                                       |
+| MatC_DRAM | s_axi_control | register  | offset   | name=MatC_DRAM_1 offset=0x28 range=32 |
+| MatC_DRAM | s_axi_control | register  | offset   | name=MatC_DRAM_2 offset=0x2c range=32 |
++-----------+---------------+-----------+----------+---------------------------------------+
+
+
+================================================================
+== M_AXI Burst Information
+================================================================
+ Note: All burst requests might be further partitioned into multiple requests during RTL generation based on max_read_burst_length or max_write_burst_length settings.
+
+* Inferred Burst Summary
++--------------+------------+-----------+--------+-------+----------------------+
+| HW Interface | Loop       | Direction | Length | Width | Location             |
++--------------+------------+-----------+--------+-------+----------------------+
+| m_axi_mem    | MAT_A_ROWS | read      | 15000  | 16    | real_matmul.cpp:33:5 |
+| m_axi_mem    | MAT_B_ROWS | read      | 30000  | 16    | real_matmul.cpp:42:5 |
+| m_axi_mem    | MAT_C_ROWS | write     | 20000  | 16    | real_matmul.cpp:76:5 |
++--------------+------------+-----------+--------+-------+----------------------+
+
+* Inferred Bursts and Widening Missed
++--------------+-----------+------------+-------------------------------------------------------------------------------------------------------+------------+----------------------+
+| HW Interface | Variable  | Loop       | Problem                                                                                               | Resolution | Location             |
++--------------+-----------+------------+-------------------------------------------------------------------------------------------------------+------------+----------------------+
+| m_axi_mem    | MatC_DRAM | MAT_C_COLS | Could not widen since type i16 size is greater than or equal to the max_widen_bitwidth threshold of 0 | 214-353    | real_matmul.cpp:78:9 |
+| m_axi_mem    | MatB_DRAM | MAT_B_COLS | Could not widen since type i16 size is greater than or equal to the max_widen_bitwidth threshold of 0 | 214-353    | real_matmul.cpp:44:9 |
+| m_axi_mem    | MatA_DRAM | MAT_A_COLS | Could not widen since type i16 size is greater than or equal to the max_widen_bitwidth threshold of 0 | 214-353    | real_matmul.cpp:35:9 |
++--------------+-----------+------------+-------------------------------------------------------------------------------------------------------+------------+----------------------+
+
+    * Resolution URL: www.xilinx.com/cgi-bin/docs/rdoc?v=2022.1;t=hls+guidance;d=XXX-YYY.html (replace XXX-YYY with column value)
+
+================================================================
+== Bind Op Report
+================================================================
++---------------------------------------------------------+-----+--------+---------------+-----+--------+---------+
+| Name                                                    | DSP | Pragma | Variable      | Op  | Impl   | Latency |
++---------------------------------------------------------+-----+--------+---------------+-----+--------+---------+
+| + real_matmul                                           | 153 |        |               |     |        |         |
+|  + real_matmul_Pipeline_MAT_A_ROWS_MAT_A_COLS           | 0   |        |               |     |        |         |
+|    add_ln33_1_fu_145_p2                                 | -   |        | add_ln33_1    | add | fabric | 0       |
+|    add_ln33_fu_187_p2                                   | -   |        | add_ln33      | add | fabric | 0       |
+|    add_ln35_fu_173_p2                                   | -   |        | add_ln35      | add | fabric | 0       |
+|  + real_matmul_Pipeline_MAT_C_ROWS_INIT_MAT_C_COLS_INIT | 1   |        |               |     |        |         |
+|    add_ln51_1_fu_94_p2                                  | -   |        | add_ln51_1    | add | fabric | 0       |
+|    add_ln51_fu_106_p2                                   | -   |        | add_ln51      | add | fabric | 0       |
+|    mac_muladd_7ns_8ns_8ns_15_4_1_U7                     | 1   |        | mul_ln54      | mul | dsp48  | 3       |
+|    mac_muladd_7ns_8ns_8ns_15_4_1_U7                     | 1   |        | add_ln54      | add | dsp48  | 3       |
+|    add_ln53_fu_138_p2                                   | -   |        | add_ln53      | add | fabric | 0       |
+|  + real_matmul_Pipeline_MAT_B_ROWS_MAT_B_COLS           | 0   |        |               |     |        |         |
+|    add_ln42_1_fu_141_p2                                 | -   |        | add_ln42_1    | add | fabric | 0       |
+|    add_ln42_fu_158_p2                                   | -   |        | add_ln42      | add | fabric | 0       |
+|    add_ln44_fu_186_p2                                   | -   |        | add_ln44      | add | fabric | 0       |
+|  + real_matmul_Pipeline_OUTER_ROWS_OUTER_COLS           | 151 |        |               |     |        |         |
+|    add_ln60_1_fu_739_p2                                 | -   |        | add_ln60_1    | add | fabric | 0       |
+|    add_ln60_fu_748_p2                                   | -   |        | add_ln60      | add | fabric | 0       |
+|    mac_muladd_7ns_8ns_8ns_15_4_1_U160                   | 1   |        | mul_ln69      | mul | dsp48  | 3       |
+|    mac_muladd_7ns_8ns_8ns_15_4_1_U160                   | 1   |        | add_ln69      | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U74                   | 1   |        | mul_ln260     | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U10                           | 1   |        | mul_ln260_1   | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U11                           | 1   |        | mul_ln260_2   | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U75                   | 1   |        | mul_ln260_3   | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U12                           | 1   |        | mul_ln260_4   | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U76                   | 1   |        | mul_ln260_5   | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U138                  | 1   |        | mul_ln260_6   | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U13                           | 1   |        | mul_ln260_7   | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U77                   | 1   |        | mul_ln260_8   | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U14                           | 1   |        | mul_ln260_9   | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U78                   | 1   |        | mul_ln260_10  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U15                           | 1   |        | mul_ln260_11  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U79                   | 1   |        | mul_ln260_12  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U16                           | 1   |        | mul_ln260_13  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U80                   | 1   |        | mul_ln260_14  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U139                  | 1   |        | mul_ln260_15  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U17                           | 1   |        | mul_ln260_16  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U81                   | 1   |        | mul_ln260_17  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U18                           | 1   |        | mul_ln260_18  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U82                   | 1   |        | mul_ln260_19  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U19                           | 1   |        | mul_ln260_20  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U83                   | 1   |        | mul_ln260_21  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U20                           | 1   |        | mul_ln260_22  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U84                   | 1   |        | mul_ln260_23  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U140                  | 1   |        | mul_ln260_24  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U21                           | 1   |        | mul_ln260_25  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U85                   | 1   |        | mul_ln260_26  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U22                           | 1   |        | mul_ln260_27  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U86                   | 1   |        | mul_ln260_28  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U141                  | 1   |        | mul_ln260_29  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U23                           | 1   |        | mul_ln260_30  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U87                   | 1   |        | mul_ln260_31  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U24                           | 1   |        | mul_ln260_32  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U88                   | 1   |        | mul_ln260_33  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U142                  | 1   |        | mul_ln260_34  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U25                           | 1   |        | mul_ln260_35  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U89                   | 1   |        | mul_ln260_36  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U26                           | 1   |        | mul_ln260_37  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U90                   | 1   |        | mul_ln260_38  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U27                           | 1   |        | mul_ln260_39  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U91                   | 1   |        | mul_ln260_40  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U28                           | 1   |        | mul_ln260_41  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U92                   | 1   |        | mul_ln260_42  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U143                  | 1   |        | mul_ln260_43  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U29                           | 1   |        | mul_ln260_44  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U93                   | 1   |        | mul_ln260_45  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U30                           | 1   |        | mul_ln260_46  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U94                   | 1   |        | mul_ln260_47  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U144                  | 1   |        | mul_ln260_48  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U31                           | 1   |        | mul_ln260_49  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U95                   | 1   |        | mul_ln260_50  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U32                           | 1   |        | mul_ln260_51  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U96                   | 1   |        | mul_ln260_52  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U145                  | 1   |        | mul_ln260_53  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U33                           | 1   |        | mul_ln260_54  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U97                   | 1   |        | mul_ln260_55  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U34                           | 1   |        | mul_ln260_56  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U98                   | 1   |        | mul_ln260_57  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U35                           | 1   |        | mul_ln260_58  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U99                   | 1   |        | mul_ln260_59  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U36                           | 1   |        | mul_ln260_60  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U100                  | 1   |        | mul_ln260_61  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U146                  | 1   |        | mul_ln260_62  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U37                           | 1   |        | mul_ln260_63  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U101                  | 1   |        | mul_ln260_64  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U38                           | 1   |        | mul_ln260_65  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U102                  | 1   |        | mul_ln260_66  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U147                  | 1   |        | mul_ln260_67  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U39                           | 1   |        | mul_ln260_68  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U103                  | 1   |        | mul_ln260_69  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U40                           | 1   |        | mul_ln260_70  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U104                  | 1   |        | mul_ln260_71  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U148                  | 1   |        | mul_ln260_72  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U41                           | 1   |        | mul_ln260_73  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U105                  | 1   |        | mul_ln260_74  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U42                           | 1   |        | mul_ln260_75  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U106                  | 1   |        | mul_ln260_76  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U43                           | 1   |        | mul_ln260_77  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U107                  | 1   |        | mul_ln260_78  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U44                           | 1   |        | mul_ln260_79  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U108                  | 1   |        | mul_ln260_80  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U149                  | 1   |        | mul_ln260_81  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U45                           | 1   |        | mul_ln260_82  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U109                  | 1   |        | mul_ln260_83  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U46                           | 1   |        | mul_ln260_84  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U110                  | 1   |        | mul_ln260_85  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U47                           | 1   |        | mul_ln260_86  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U111                  | 1   |        | mul_ln260_87  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U48                           | 1   |        | mul_ln260_88  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U112                  | 1   |        | mul_ln260_89  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U150                  | 1   |        | mul_ln260_90  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U49                           | 1   |        | mul_ln260_91  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U113                  | 1   |        | mul_ln260_92  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U50                           | 1   |        | mul_ln260_93  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U114                  | 1   |        | mul_ln260_94  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U51                           | 1   |        | mul_ln260_95  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U115                  | 1   |        | mul_ln260_96  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U52                           | 1   |        | mul_ln260_97  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U116                  | 1   |        | mul_ln260_98  | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U151                  | 1   |        | mul_ln260_99  | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U53                           | 1   |        | mul_ln260_100 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U117                  | 1   |        | mul_ln260_101 | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U54                           | 1   |        | mul_ln260_102 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U118                  | 1   |        | mul_ln260_103 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U152                  | 1   |        | mul_ln260_104 | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U55                           | 1   |        | mul_ln260_105 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U119                  | 1   |        | mul_ln260_106 | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U56                           | 1   |        | mul_ln260_107 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U120                  | 1   |        | mul_ln260_108 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U153                  | 1   |        | mul_ln260_109 | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U57                           | 1   |        | mul_ln260_110 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U121                  | 1   |        | mul_ln260_111 | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U58                           | 1   |        | mul_ln260_112 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U122                  | 1   |        | mul_ln260_113 | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U59                           | 1   |        | mul_ln260_114 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U123                  | 1   |        | mul_ln260_115 | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U60                           | 1   |        | mul_ln260_116 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U124                  | 1   |        | mul_ln260_117 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U154                  | 1   |        | mul_ln260_118 | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U61                           | 1   |        | mul_ln260_119 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U125                  | 1   |        | mul_ln260_120 | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U62                           | 1   |        | mul_ln260_121 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U126                  | 1   |        | mul_ln260_122 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U155                  | 1   |        | mul_ln260_123 | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U63                           | 1   |        | mul_ln260_124 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U127                  | 1   |        | mul_ln260_125 | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U64                           | 1   |        | mul_ln260_126 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U128                  | 1   |        | mul_ln260_127 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U156                  | 1   |        | mul_ln260_128 | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U65                           | 1   |        | mul_ln260_129 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U129                  | 1   |        | mul_ln260_130 | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U66                           | 1   |        | mul_ln260_131 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U130                  | 1   |        | mul_ln260_132 | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U67                           | 1   |        | mul_ln260_133 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U131                  | 1   |        | mul_ln260_134 | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U68                           | 1   |        | mul_ln260_135 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U132                  | 1   |        | mul_ln260_136 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U157                  | 1   |        | mul_ln260_137 | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U69                           | 1   |        | mul_ln260_138 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U133                  | 1   |        | mul_ln260_139 | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U70                           | 1   |        | mul_ln260_140 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U134                  | 1   |        | mul_ln260_141 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U158                  | 1   |        | mul_ln260_142 | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U71                           | 1   |        | mul_ln260_143 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U135                  | 1   |        | mul_ln260_144 | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U72                           | 1   |        | mul_ln260_145 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U136                  | 1   |        | mul_ln260_146 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U159                  | 1   |        | mul_ln260_147 | mul | dsp48  | 3       |
+|    mul_mul_16s_16s_16_4_1_U73                           | 1   |        | mul_ln260_148 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U137                  | 1   |        | mul_ln260_149 | mul | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U74                   | 1   |        | add_ln260     | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U75                   | 1   |        | add_ln260_1   | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U76                   | 1   |        | add_ln260_3   | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U77                   | 1   |        | add_ln260_4   | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U138                  | 1   |        | add_ln260_5   | add | dsp48  | 3       |
+|    add_ln260_6_fu_6359_p2                               | -   |        | add_ln260_6   | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U78                   | 1   |        | add_ln260_8   | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U79                   | 1   |        | add_ln260_9   | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U80                   | 1   |        | add_ln260_11  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U81                   | 1   |        | add_ln260_12  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U139                  | 1   |        | add_ln260_13  | add | dsp48  | 3       |
+|    add_ln260_14_fu_6363_p2                              | -   |        | add_ln260_14  | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U82                   | 1   |        | add_ln260_17  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U83                   | 1   |        | add_ln260_18  | add | dsp48  | 3       |
+|    add_ln260_19_fu_6339_p2                              | -   |        | add_ln260_19  | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U84                   | 1   |        | add_ln260_20  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U85                   | 1   |        | add_ln260_21  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U140                  | 1   |        | add_ln260_22  | add | dsp48  | 3       |
+|    add_ln260_23_fu_6367_p2                              | -   |        | add_ln260_23  | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U86                   | 1   |        | add_ln260_25  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U87                   | 1   |        | add_ln260_26  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U141                  | 1   |        | add_ln260_27  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U88                   | 1   |        | add_ln260_29  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U89                   | 1   |        | add_ln260_30  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U142                  | 1   |        | add_ln260_31  | add | dsp48  | 3       |
+|    add_ln260_32_fu_6371_p2                              | -   |        | add_ln260_32  | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U90                   | 1   |        | add_ln260_36  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U91                   | 1   |        | add_ln260_37  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U92                   | 1   |        | add_ln260_39  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U93                   | 1   |        | add_ln260_40  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U143                  | 1   |        | add_ln260_41  | add | dsp48  | 3       |
+|    add_ln260_42_fu_6375_p2                              | -   |        | add_ln260_42  | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U94                   | 1   |        | add_ln260_44  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U95                   | 1   |        | add_ln260_45  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U144                  | 1   |        | add_ln260_46  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U96                   | 1   |        | add_ln260_48  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U97                   | 1   |        | add_ln260_49  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U145                  | 1   |        | add_ln260_50  | add | dsp48  | 3       |
+|    add_ln260_51_fu_6379_p2                              | -   |        | add_ln260_51  | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U98                   | 1   |        | add_ln260_54  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U99                   | 1   |        | add_ln260_55  | add | dsp48  | 3       |
+|    add_ln260_56_fu_6343_p2                              | -   |        | add_ln260_56  | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U100                  | 1   |        | add_ln260_57  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U101                  | 1   |        | add_ln260_58  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U146                  | 1   |        | add_ln260_59  | add | dsp48  | 3       |
+|    add_ln260_60_fu_6383_p2                              | -   |        | add_ln260_60  | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U102                  | 1   |        | add_ln260_62  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U103                  | 1   |        | add_ln260_63  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U147                  | 1   |        | add_ln260_64  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U104                  | 1   |        | add_ln260_66  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U105                  | 1   |        | add_ln260_67  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U148                  | 1   |        | add_ln260_68  | add | dsp48  | 3       |
+|    add_ln260_69_fu_6387_p2                              | -   |        | add_ln260_69  | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U106                  | 1   |        | add_ln260_74  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U107                  | 1   |        | add_ln260_75  | add | dsp48  | 3       |
+|    add_ln260_76_fu_6347_p2                              | -   |        | add_ln260_76  | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U108                  | 1   |        | add_ln260_77  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U109                  | 1   |        | add_ln260_78  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U149                  | 1   |        | add_ln260_79  | add | dsp48  | 3       |
+|    add_ln260_80_fu_6391_p2                              | -   |        | add_ln260_80  | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U110                  | 1   |        | add_ln260_82  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U111                  | 1   |        | add_ln260_83  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U112                  | 1   |        | add_ln260_85  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U113                  | 1   |        | add_ln260_86  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U150                  | 1   |        | add_ln260_87  | add | dsp48  | 3       |
+|    add_ln260_88_fu_6395_p2                              | -   |        | add_ln260_88  | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U114                  | 1   |        | add_ln260_91  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U115                  | 1   |        | add_ln260_92  | add | dsp48  | 3       |
+|    add_ln260_93_fu_6351_p2                              | -   |        | add_ln260_93  | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U116                  | 1   |        | add_ln260_94  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U117                  | 1   |        | add_ln260_95  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U151                  | 1   |        | add_ln260_96  | add | dsp48  | 3       |
+|    add_ln260_97_fu_6399_p2                              | -   |        | add_ln260_97  | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U118                  | 1   |        | add_ln260_99  | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U119                  | 1   |        | add_ln260_100 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U152                  | 1   |        | add_ln260_101 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U120                  | 1   |        | add_ln260_103 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U121                  | 1   |        | add_ln260_104 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U153                  | 1   |        | add_ln260_105 | add | dsp48  | 3       |
+|    add_ln260_106_fu_6403_p2                             | -   |        | add_ln260_106 | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U122                  | 1   |        | add_ln260_110 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U123                  | 1   |        | add_ln260_111 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U124                  | 1   |        | add_ln260_113 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U125                  | 1   |        | add_ln260_114 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U154                  | 1   |        | add_ln260_115 | add | dsp48  | 3       |
+|    add_ln260_116_fu_6407_p2                             | -   |        | add_ln260_116 | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U126                  | 1   |        | add_ln260_118 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U127                  | 1   |        | add_ln260_119 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U155                  | 1   |        | add_ln260_120 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U128                  | 1   |        | add_ln260_122 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U129                  | 1   |        | add_ln260_123 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U156                  | 1   |        | add_ln260_124 | add | dsp48  | 3       |
+|    add_ln260_125_fu_6411_p2                             | -   |        | add_ln260_125 | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U130                  | 1   |        | add_ln260_128 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U131                  | 1   |        | add_ln260_129 | add | dsp48  | 3       |
+|    add_ln260_130_fu_6355_p2                             | -   |        | add_ln260_130 | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U132                  | 1   |        | add_ln260_131 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U133                  | 1   |        | add_ln260_132 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U157                  | 1   |        | add_ln260_133 | add | dsp48  | 3       |
+|    add_ln260_134_fu_6415_p2                             | -   |        | add_ln260_134 | add | fabric | 0       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U134                  | 1   |        | add_ln260_136 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U135                  | 1   |        | add_ln260_137 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U158                  | 1   |        | add_ln260_138 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U136                  | 1   |        | add_ln260_140 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U137                  | 1   |        | add_ln260_141 | add | dsp48  | 3       |
+|    mac_muladd_16s_16s_16ns_16_4_1_U159                  | 1   |        | add_ln260_142 | add | dsp48  | 3       |
+|    add_ln260_143_fu_6419_p2                             | -   |        | add_ln260_143 | add | fabric | 0       |
+|    add_ln62_fu_786_p2                                   | -   |        | add_ln62      | add | fabric | 0       |
+|  + real_matmul_Pipeline_MAT_C_ROWS_MAT_C_COLS           | 1   |        |               |     |        |         |
+|    add_ln76_1_fu_133_p2                                 | -   |        | add_ln76_1    | add | fabric | 0       |
+|    add_ln76_fu_145_p2                                   | -   |        | add_ln76      | add | fabric | 0       |
+|    mac_muladd_7ns_8ns_8ns_15_4_1_U166                   | 1   |        | mul_ln79      | mul | dsp48  | 3       |
+|    mac_muladd_7ns_8ns_8ns_15_4_1_U166                   | 1   |        | add_ln79      | add | dsp48  | 3       |
+|    add_ln78_fu_177_p2                                   | -   |        | add_ln78      | add | fabric | 0       |
++---------------------------------------------------------+-----+--------+---------------+-----+--------+---------+
+
+
+================================================================
+== Bind Storage Report
+================================================================
++---------------+------+------+--------+----------+---------+------+---------+
+| Name          | BRAM | URAM | Pragma | Variable | Storage | Impl | Latency |
++---------------+------+------+--------+----------+---------+------+---------+
+| + real_matmul | 233  | 0    |        |          |         |      |         |
+|   MatA_V_U    | 134  | -    |        | MatA_V   | ram_s2p | auto | 1       |
+|   MatB_V_U    | 134  | -    |        | MatB_V   | ram_1p  | auto | 1       |
+|   MatC_V_U    | 32   | -    |        | MatC_V   | ram_1p  | auto | 1       |
++---------------+------+------+--------+----------+---------+------+---------+
+
+
+================================================================
+== Pragma Report
+================================================================
+* Valid Pragma Syntax
++---------------+------------------------------------------------------+----------------------------------------------+
+| Type          | Options                                              | Location                                     |
++---------------+------------------------------------------------------+----------------------------------------------+
+| interface     | m_axi depth=1 port=MatA_DRAM offset=slave bundle=mem | real_matmul.cpp:17 in real_matmul, MatA_DRAM |
+| interface     | m_axi depth=1 port=MatB_DRAM offset=slave bundle=mem | real_matmul.cpp:18 in real_matmul, MatB_DRAM |
+| interface     | m_axi depth=1 port=MatC_DRAM offset=slave bundle=mem | real_matmul.cpp:19 in real_matmul, MatC_DRAM |
+| interface     | s_axilite port=return                                | real_matmul.cpp:21 in real_matmul, return    |
+| array_reshape | variable=MatA complete dim=2                         | real_matmul.cpp:27 in real_matmul, MatA      |
+| array_reshape | variable=MatB complete dim=1                         | real_matmul.cpp:28 in real_matmul, MatB      |
+| pipeline      | II=1                                                 | real_matmul.cpp:63 in real_matmul            |
++---------------+------------------------------------------------------+----------------------------------------------+
+
+
