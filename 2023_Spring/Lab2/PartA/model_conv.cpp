@@ -48,7 +48,7 @@ void model_conv (
 
             output_feature_map[of][oh][ow] = 0;
 
-            float lin_op = 0;
+            float sum = 0;
 
             for (int id = 0; id < IN_FM_DEPTH; id++)
               for (int kh = 0; kh < KERN_HEIGHT; kh++)
@@ -64,12 +64,12 @@ void model_conv (
                     if (idx_h >= IN_FM_HEIGHT || idx_w >= IN_FM_WIDTH)
                       continue;
 
-                    lin_op += input_feature_map[id][idx_h][idx_w] * layer_weights[of][id][kh][kw];
+                    sum += input_feature_map[id][idx_h][idx_w] * layer_weights[of][id][kh][kw];
 
                 }
 
 
-            output_feature_map[of][oh][ow] += relu(lin_op + layer_bias[of]);
+            output_feature_map[of][oh][ow] += relu(sum + layer_bias[of]);
         }
 
 }
