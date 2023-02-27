@@ -44,13 +44,13 @@ void load_input_tile_block_from_DRAM (
                 //       the buffer based on border conditions
                 //in_fm_buf[f][i][j] = 0; // Just a placeholder
 
-                int idx_h = height_offset + i - P - (MARGIN/2);
-                int idx_w = width_offset + j - P - (MARGIN/2);
+                int idx_h = height_offset + i - P;
+                int idx_w = width_offset + j - P;
 
                 if ((idx_h < 0 || idx_h >= IN_FM_HEIGHT) ||
                     (idx_w < 0 || idx_w >= IN_FM_WIDTH))
                 {
-                    in_fm_buf[c][i][j] = 0;
+                    in_fm_buf[c][i][j] = (fm_t) 0;
                 }
                 else
                 {

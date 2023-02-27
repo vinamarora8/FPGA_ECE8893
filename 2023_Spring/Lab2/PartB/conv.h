@@ -58,7 +58,7 @@
 //       rows and columns (belonging to adjacent tiles) required
 //       to implement a functionally-correct tiling-based convolution.
 //--------------------------------------------------------------------------
-#define MARGIN            KERNEL_WIDTH-1
+#define MARGIN            (2 * PADDING)
 
 //--------------------------------------------------------------------------
 // Input tile buffer dimensions
