@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Course:      ECE8893 - Parallel Programming for FPGAs
 // Filename:    conv.h
-// Description: Header file for tiling-based synthesizable implementation of 
+// Description: Header file for tiling-based synthesizable implementation of
 //              ResNet-50's first 7x7 convolution layer with HD input image.
 //
 // Note:        You are required to only modify the value of MARGIN in this
-//              file. DO NOT CHANGE ANY OTHER DEFINES as this file will not 
+//              file. DO NOT CHANGE ANY OTHER DEFINES as this file will not
 //              be included in your submission.
 //
 //              This file should be identical in both Part B and Part C.
@@ -29,7 +29,7 @@
 #endif
 
 //--------------------------------------------------------------------------
-// Configuration of ResNet-50's first 7 x 7 convolution layer with HD input 
+// Configuration of ResNet-50's first 7 x 7 convolution layer with HD input
 //--------------------------------------------------------------------------
 #define IN_FM_DEPTH       3
 #define IN_FM_HEIGHT      736
@@ -40,12 +40,12 @@
 #define OUT_FM_WIDTH      640
 
 #define STRIDE            2
-#define PADDING           3 
+#define PADDING           3
 #define KERNEL_HEIGHT     7
 #define KERNEL_WIDTH      7
 
 //--------------------------------------------------------------------------
-// Divide the input image into multiple tiles 
+// Divide the input image into multiple tiles
 //--------------------------------------------------------------------------
 #define TILE_HEIGHT       46
 #define TILE_WIDTH        40
@@ -55,20 +55,20 @@
 
 //--------------------------------------------------------------------------
 // TODO: Modify the value of MARGIN based on the number of additional
-//       rows and columns (belonging to adjacent tiles) required 
+//       rows and columns (belonging to adjacent tiles) required
 //       to implement a functionally-correct tiling-based convolution.
 //--------------------------------------------------------------------------
-#define MARGIN            0
+#define MARGIN            (2 * PADDING)
 
 //--------------------------------------------------------------------------
-// Input tile buffer dimensions 
+// Input tile buffer dimensions
 //--------------------------------------------------------------------------
 #define IN_BUF_DEPTH      3
-#define IN_BUF_HEIGHT     TILE_HEIGHT + MARGIN 
-#define IN_BUF_WIDTH      TILE_WIDTH  + MARGIN 
+#define IN_BUF_HEIGHT     TILE_HEIGHT + MARGIN
+#define IN_BUF_WIDTH      TILE_WIDTH  + MARGIN
 
 //--------------------------------------------------------------------------
-// Output tile buffer dimensions 
+// Output tile buffer dimensions
 //--------------------------------------------------------------------------
 #define OUT_BUF_DEPTH     4
 #define OUT_BUF_HEIGHT    TILE_HEIGHT / STRIDE
