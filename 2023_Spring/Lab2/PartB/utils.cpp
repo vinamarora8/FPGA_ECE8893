@@ -1,9 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Course:      ECE8893 - Parallel Programming for FPGAs
 // Filename:    utils.cpp
-// Description: Utility functions to implement tiling-based convolution 
+// Description: Utility functions to implement tiling-based convolution
 //
-// Note:        Modify/complete the functions as required by your design. 
+// Note:        Modify/complete the functions as required by your design.
 //
 //              You are free to create any additional functions you may need
 //              for your implementation.
@@ -11,26 +11,26 @@
 #include "utils.h"
 
 //--------------------------------------------------------------------------
-// Function to load an input tile block from from off-chip DRAM 
+// Function to load an input tile block from from off-chip DRAM
 // to on-chip BRAM.
 //
-// TODO: This is an incomplete function that you need to modify  
+// TODO: This is an incomplete function that you need to modify
 //       to handle the border conditions appropriately while loading.
 //--------------------------------------------------------------------------
 void load_input_tile_block_from_DRAM (
-    fm_t in_fm_buf[IN_BUF_DEPTH][IN_BUF_HEIGHT][IN_BUF_WIDTH], 
-    fm_t in_fm[IN_FM_DEPTH][IN_FM_HEIGHT][IN_FM_WIDTH], 
-    int  ti, 
-    int  tj 
+    fm_t in_fm_buf[IN_BUF_DEPTH][IN_BUF_HEIGHT][IN_BUF_WIDTH],
+    fm_t in_fm[IN_FM_DEPTH][IN_FM_HEIGHT][IN_FM_WIDTH],
+    int  ti,
+    int  tj
 )
 {
-    const int height_offset = ti * TILE_HEIGHT;  
+    const int height_offset = ti * TILE_HEIGHT;
     const int width_offset  = tj * TILE_WIDTH;
 
     const int P = PADDING;
 
     INPUT_BUFFER_DEPTH:
-    for(int c = 0; c < IN_BUF_DEPTH; c++)
+    for(int c = 0; c < IN_FM_DEPTH; c++) // FM and BUF have same depth
     {
         INPUT_BUFFER_HEIGHT:
         for(int i = 0; i < IN_BUF_HEIGHT; i++)
@@ -40,9 +40,23 @@ void load_input_tile_block_from_DRAM (
             {
                 // TODO: Handle border features here
                 //
-                // Hint: Either load 0 or input feature into 
+                // Hint: Either load 0 or input feature into
                 //       the buffer based on border conditions
-                in_fm_buf[f][i][j] = 0; // Just a placeholder
+                //in_fm_buf[f][i][j] = 0; // Just a placeholder
+
+                int idx_h = height_offset + i - P - (MARGIN/2);
+                int idx_w = width_offset + j - P - (MARGIN/2);
+
+                if ((idx_h < 0 || idx_h >= IN_FM_HEIGHT) ||
+                    (idx_w < 0 || idx_w >= IN_FM_WIDTH))
+                {
+                    in_fm_buf[c][i][j] = 0;
+                }
+                else
+                {
+                    in_fm_buf[c][i][j] = in_fm[c][idx_h][idx_w];
+                }
+
             }
         }
     }
@@ -81,7 +95,7 @@ void load_layer_params_from_DRAM (
             }
         }
     }
-    
+
     BIAS:
     for(int f = 0; f < OUT_BUF_DEPTH; f++)
     {
@@ -99,8 +113,8 @@ void load_layer_params_from_DRAM (
 // add pragmas, restructure code, etc. depending on your way of optimization.
 //--------------------------------------------------------------------------
 void store_output_tile_to_DRAM (
-    fm_t out_fm[OUT_FM_DEPTH][OUT_FM_HEIGHT][OUT_FM_WIDTH], 
-    fm_t out_fm_buf[OUT_BUF_DEPTH][OUT_BUF_HEIGHT][OUT_BUF_WIDTH], 
+    fm_t out_fm[OUT_FM_DEPTH][OUT_FM_HEIGHT][OUT_FM_WIDTH],
+    fm_t out_fm_buf[OUT_BUF_DEPTH][OUT_BUF_HEIGHT][OUT_BUF_WIDTH],
     int  ti,
     int  tj,
     int  kernel_group
