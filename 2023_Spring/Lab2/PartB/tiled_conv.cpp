@@ -69,10 +69,10 @@ void tiled_conv (
                                                 input_feature_map,
                                                 ti, tj);
 
-                load_layer_params_from_DRAM(layer_weights,
-                                            layer_bias,
-                                            conv_wt_buf,
+                load_layer_params_from_DRAM(conv_wt_buf,
                                             conv_bias_buf,
+                                            layer_weights,
+                                            layer_bias,
                                             tk);
 
                 conv_7x7(conv_out_buf, conv_in_buf, conv_wt_buf, conv_bias_buf);

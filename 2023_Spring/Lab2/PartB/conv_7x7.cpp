@@ -26,6 +26,34 @@ void conv_7x7 (
     // TODO: Your code for Part B goes here.
     */
 
+    const int S = STRIDE;
+
+ OUT_FEAT:
+    for (int of = 0; of < OUT_BUF_DEPTH; of++)
+    OUT_ROW:
+      for (int oh = 0; oh < OUT_BUF_HEIGHT; oh++)
+      OUT_COL:
+        for (int ow = 0; ow < OUT_BUF_WIDTH; ow++)
+        {
+
+            fm_t sum = 0;
+
+        IN_FEAT:
+            for (int id = 0; id < IN_BUF_DEPTH; id++)
+            IN_ROW:
+              for (int kh = 0; kh < KERNEL_HEIGHT; kh++)
+              IN_COL:
+                for (int kw = 0; kw < KERNEL_WIDTH; kw++)
+                {
+
+                    int i = S*oh + kh;
+                    int j = S*ow + kw;
+
+                    sum += X_buf[id][i][j] * W_buf[of][id][kh][kw];
+                }
+
+            Y_buf[of][oh][ow] = sum + B_buf[of];
+        }
 
 
 
