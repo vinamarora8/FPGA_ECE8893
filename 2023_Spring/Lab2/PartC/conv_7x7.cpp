@@ -26,47 +26,40 @@ void conv_7x7 (
     #pragma HLS ARRAY_RESHAPE variable=X_buf type=block factor=3 dim=1
     #pragma HLS ARRAY_RESHAPE variable=W_buf type=block factor=3 dim=2
 
-    #pragma HLS ARRAY_PARTITION variable=X_buf type=block factor=23 dim=3
-    #pragma HLS ARRAY_PARTITION variable=W_buf type=block factor=7 dim=4
+    #pragma HLS ARRAY_PARTITION variable=W_buf type=complete dim=4
 
-    //#pragma HLS ARRAY_PARTITION variable=X_buf type=block factor=26 dim=2
+    //#pragma HLS ARRAY_PARTITION variable=X_buf type=block factor=4 dim=2
+    //#pragma HLS ARRAY_PARTITION variable=Y_buf type=block factor=4 dim=2
+
+    //#pragma HLS ARRAY_PARTITION variable=W_buf type=block factor=7 dim=4
 
     const int S = STRIDE;
 
-    static fm_t r[KERNEL_WIDTH];
-    #pragma HLS ARRAY_PARTITION variable=r type=complete dim=1
-
-    OUT_FEAT: 
+    OUT_FEAT:
     for (int of = 0; of < OUT_BUF_DEPTH; of++)
     {
         OUT_ROW:
         for (int oh = 0; oh < OUT_BUF_HEIGHT; oh++)
         {
-            OUT_COL: 
+            OUT_COL:
             for (int ow = 0; ow < OUT_BUF_WIDTH; ow++)
             {
                 fm_t sum = 0;
-                IN_ROW: 
+                IN_ROW:
                 for (int kh = 0; kh < KERNEL_HEIGHT; kh++)
                 {
-                    #pragma HLS pipeline II=1
-                    fm_t sum_local = 0;
+                    //fm_t sum_local = 0;
                     IN_COL:
                     for (int kw = 0; kw < KERNEL_WIDTH; kw++)
                     {
-                        #pragma HLS unroll
-                        IN_FEAT: 
+                        IN_FEAT:
                         for (int id = 0; id < IN_BUF_DEPTH; id++)
                         {
-                            #pragma HLS unroll
-                            sum_local += X_buf[id][S*oh + kh][S*ow + kw] * W_buf[of][id][kh][kw];
+                            #pragma HLS unroll // Covered by array reshape
+                            Y_buf[of][oh][ow] += X_buf[id][S*oh + kh][S*ow + kw] * W_buf[of][id][kh][kw];
                         }
                     }
-
-                    sum += sum_local;
                 }
-
-                Y_buf[of][oh][ow] = sum + B_buf[of];
             }
         }
     }
