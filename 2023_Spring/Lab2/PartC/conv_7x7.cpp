@@ -23,35 +23,51 @@ void conv_7x7 (
 // TODO: Your code for Part C goes here.
 //---------------------------------------------------------------------------
 
+    #pragma HLS ARRAY_RESHAPE variable=X_buf type=block factor=3 dim=1
+    #pragma HLS ARRAY_RESHAPE variable=W_buf type=block factor=3 dim=2
+
+    #pragma HLS ARRAY_PARTITION variable=X_buf type=block factor=23 dim=3
+    #pragma HLS ARRAY_PARTITION variable=W_buf type=block factor=7 dim=4
+
+    //#pragma HLS ARRAY_PARTITION variable=X_buf type=block factor=26 dim=2
+
     const int S = STRIDE;
 
- OUT_FEAT:
+    static fm_t r[KERNEL_WIDTH];
+    #pragma HLS ARRAY_PARTITION variable=r type=complete dim=1
+
+    OUT_FEAT: 
     for (int of = 0; of < OUT_BUF_DEPTH; of++)
-    OUT_ROW:
-      for (int oh = 0; oh < OUT_BUF_HEIGHT; oh++)
-      OUT_COL:
-        for (int ow = 0; ow < OUT_BUF_WIDTH; ow++)
+    {
+        OUT_ROW:
+        for (int oh = 0; oh < OUT_BUF_HEIGHT; oh++)
         {
-
-            fm_t sum = 0;
-
-        IN_FEAT:
-            for (int id = 0; id < IN_BUF_DEPTH; id++)
-            IN_ROW:
-              for (int kh = 0; kh < KERNEL_HEIGHT; kh++)
-              IN_COL:
-                for (int kw = 0; kw < KERNEL_WIDTH; kw++)
+            OUT_COL: 
+            for (int ow = 0; ow < OUT_BUF_WIDTH; ow++)
+            {
+                fm_t sum = 0;
+                IN_ROW: 
+                for (int kh = 0; kh < KERNEL_HEIGHT; kh++)
                 {
+                    #pragma HLS pipeline II=1
+                    fm_t sum_local = 0;
+                    IN_COL:
+                    for (int kw = 0; kw < KERNEL_WIDTH; kw++)
+                    {
+                        #pragma HLS unroll
+                        IN_FEAT: 
+                        for (int id = 0; id < IN_BUF_DEPTH; id++)
+                        {
+                            #pragma HLS unroll
+                            sum_local += X_buf[id][S*oh + kh][S*ow + kw] * W_buf[of][id][kh][kw];
+                        }
+                    }
 
-                    int i = S*oh + kh;
-                    int j = S*ow + kw;
-
-                    sum += X_buf[id][i][j] * W_buf[of][id][kh][kw];
+                    sum += sum_local;
                 }
 
-            Y_buf[of][oh][ow] = sum + B_buf[of];
+                Y_buf[of][oh][ow] = sum + B_buf[of];
+            }
         }
-
-
-
+    }
 }
