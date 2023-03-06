@@ -123,25 +123,19 @@ void store_output_tile_to_DRAM (
     const int height_offset = ti * OUT_BUF_HEIGHT;
     const int width_offset  = tj * OUT_BUF_WIDTH;
 
-    OUTPUT_BUFFER_DEPTH:
-    for(int f = 0; f < OUT_BUF_DEPTH; f++)
-    {
-        OUTPUT_BUFFER_HEIGHT:
-        for(int i = 0; i < OUT_BUF_HEIGHT; i++)
+    OUTPUT_BUFFER_HEIGHT: for(int i = 0; i < OUT_BUF_HEIGHT; i++) {
+    OUTPUT_BUFFER_WIDTH: for(int j = 0; j < OUT_BUF_WIDTH; j++) {
+        #pragma HLS unroll
+    OUTPUT_BUFFER_DEPTH: for(int f = 0; f < OUT_BUF_DEPTH; f++) {
+        #pragma HLS unroll
+        // ReLU in-place
+        if(out_fm_buf[f][i][j] < (fm_t) 0)
         {
-            OUTPUT_BUFFER_WIDTH:
-            for(int j = 0; j < OUT_BUF_WIDTH; j++)
-            {
-                // ReLU in-place
-                if(out_fm_buf[f][i][j] < (fm_t) 0)
-                {
-                    out_fm[depth_offset + f][height_offset + i][width_offset + j] = (fm_t) 0;
-                }
-                else
-                {
-                    out_fm[depth_offset + f][height_offset + i][width_offset + j] = out_fm_buf[f][i][j];
-                }
-            }
+            out_fm[depth_offset + f][height_offset + i][width_offset + j] = (fm_t) 0;
         }
-    }
+        else
+        {
+            out_fm[depth_offset + f][height_offset + i][width_offset + j] = out_fm_buf[f][i][j];
+        }
+   }}}
 }
