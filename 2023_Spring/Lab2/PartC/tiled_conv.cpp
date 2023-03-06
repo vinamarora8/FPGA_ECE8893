@@ -36,8 +36,7 @@ void tiled_conv (
     fm_t conv_in_buf[IN_BUF_DEPTH][IN_BUF_HEIGHT][IN_BUF_WIDTH];
     wt_t conv_wt_buf[OUT_BUF_DEPTH][IN_BUF_DEPTH][KERNEL_HEIGHT][KERNEL_WIDTH];
     wt_t conv_bias_buf[OUT_BUF_DEPTH];
-    fm_t conv_out_buf[OUT_BUF_DEPTH][OUT_BUF_HEIGHT][OUT_BUF_WIDTH] = {0};
-
+    fm_t conv_out_buf[OUT_BUF_DEPTH][OUT_BUF_HEIGHT][OUT_BUF_WIDTH];
 
     //--------------------------------------------------------------------------
     // Process each tile iteratively
@@ -73,6 +72,8 @@ void tiled_conv (
                                             layer_bias,
                                             tk);
 
+
+                CONV_7x7:
                 conv_7x7(conv_out_buf, conv_in_buf, conv_wt_buf, conv_bias_buf);
 
                 store_output_tile_to_DRAM(output_feature_map,

@@ -118,6 +118,7 @@ void store_output_tile_to_DRAM (
     int  kernel_group
 )
 {
+
     const int depth_offset  = kernel_group * OUT_BUF_DEPTH;
     const int height_offset = ti * OUT_BUF_HEIGHT;
     const int width_offset  = tj * OUT_BUF_WIDTH;

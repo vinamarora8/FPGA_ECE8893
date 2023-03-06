@@ -23,44 +23,49 @@ void conv_7x7 (
 // TODO: Your code for Part C goes here.
 //---------------------------------------------------------------------------
 
-    #pragma HLS ARRAY_RESHAPE variable=X_buf type=block factor=3 dim=1
-    #pragma HLS ARRAY_RESHAPE variable=W_buf type=block factor=3 dim=2
+    // Parallelism across output depth (complete)
+    #pragma HLS ARRAY_RESHAPE variable=W_buf type=complete dim=1
+    #pragma HLS ARRAY_RESHAPE variable=B_buf type=complete dim=1
+    #pragma HLS ARRAY_RESHAPE variable=Y_buf type=complete dim=1
 
-    #pragma HLS ARRAY_PARTITION variable=W_buf type=complete dim=4
+    // Parallelism across output width (complete)
+    // Increasing this further causes dependencies inside OUT_ROW
+    // Leading to II violations and increased latency
+    #pragma HLS ARRAY_PARTITION variable=X_buf type=block  factor=23 dim=3
+    #pragma HLS ARRAY_RESHAPE   variable=X_buf type=cyclic factor=2 dim=3 // IN: 3x52x(23x2)
+    #pragma HLS ARRAY_PARTITION variable=Y_buf type=cyclic factor=10 dim=3
 
-    //#pragma HLS ARRAY_PARTITION variable=X_buf type=block factor=4 dim=2
-    //#pragma HLS ARRAY_PARTITION variable=Y_buf type=block factor=4 dim=2
+    // Parallelism across output height
+    //#pragma HLS ARRAY_RESHAPE   variable=X_buf type=cyclic factor=2 dim=2
+    //#pragma HLS ARRAY_PARTITION variable=X_buf type=cyclic factor=2 dim=2
+    //#pragma HLS ARRAY_PARTITION variable=Y_buf type=cyclic factor=2 dim=2
 
-    //#pragma HLS ARRAY_PARTITION variable=W_buf type=block factor=7 dim=4
 
     const int S = STRIDE;
 
-    OUT_FEAT:
-    for (int of = 0; of < OUT_BUF_DEPTH; of++)
-    {
-        OUT_ROW:
-        for (int oh = 0; oh < OUT_BUF_HEIGHT; oh++)
-        {
-            OUT_COL:
-            for (int ow = 0; ow < OUT_BUF_WIDTH; ow++)
-            {
-                fm_t sum = 0;
-                IN_ROW:
-                for (int kh = 0; kh < KERNEL_HEIGHT; kh++)
-                {
-                    //fm_t sum_local = 0;
-                    IN_COL:
-                    for (int kw = 0; kw < KERNEL_WIDTH; kw++)
-                    {
-                        IN_FEAT:
-                        for (int id = 0; id < IN_BUF_DEPTH; id++)
-                        {
-                            #pragma HLS unroll // Covered by array reshape
-                            Y_buf[of][oh][ow] += X_buf[id][S*oh + kh][S*ow + kw] * W_buf[of][id][kh][kw];
-                        }
-                    }
-                }
-            }
-        }
+    // Bias copy
+    BIAS_ROW:  for (int h = 0; h < OUT_BUF_HEIGHT; h++) {
+    BIAS_COL:  for (int w = 0; w < OUT_BUF_WIDTH ; w++) {
+    BIAS_FEAT: for (int f = 0; f < OUT_BUF_DEPTH ; f++) {
+    #pragma HLS unroll
+          Y_buf[f][h][w] = (fm_t) B_buf[f];
+    }}}
+
+
+    IN_ROW:   for (int kh = 0; kh < KERNEL_HEIGHT ; kh++)  { // it: 7
+    IN_COL:   for (int kw = 0; kw < KERNEL_WIDTH  ; kw++)  { // it: 7
+    IN_FEAT:  for (int id = 0; id < IN_BUF_DEPTH  ; id++)  { // it: 3
+    OUT_ROW:  for (int oh = 0; oh < OUT_BUF_HEIGHT; oh++)  { // it: 23
+    OUT_COL:  for (int ow = 0; ow < OUT_BUF_WIDTH ; ow++) { // it: 20
+    //#pragma HLS pipeline II=5
+    #pragma HLS unroll factor=10
+    OUT_FEAT: for (int of = 0; of < OUT_BUF_DEPTH ; of++) {
+    #pragma HLS unroll
+    Y_buf[of][oh][ow] += (X_buf[id][S*oh + kh][S*ow + kw] * W_buf[of][id][kh][kw]);
+    }
+    }
+    }
+    }
+    }
     }
 }
