@@ -29,10 +29,8 @@ void conv_7x7 (
     #pragma HLS ARRAY_RESHAPE variable=Y_buf type=complete dim=1
 
     // Parallelism across output width (complete)
-    // Increasing this further causes dependencies inside OUT_ROW
-    // Leading to II violations and increased latency
     #pragma HLS ARRAY_PARTITION variable=X_buf type=block  factor=23 dim=3
-    #pragma HLS ARRAY_RESHAPE   variable=X_buf type=cyclic factor=2 dim=3 // IN: 3x52x(23x2)
+    #pragma HLS ARRAY_RESHAPE   variable=X_buf type=cyclic factor=2 dim=3
     #pragma HLS ARRAY_PARTITION variable=Y_buf type=cyclic factor=20 dim=3
 
     #pragma HLS ARRAY_PARTITION variable=W_buf type=cyclic factor=2 dim=4
