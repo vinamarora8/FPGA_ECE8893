@@ -29,35 +29,27 @@ void load_input_tile_block_from_DRAM (
 
     const int P = PADDING;
 
-    INPUT_BUFFER_DEPTH:
-    for(int c = 0; c < IN_BUF_DEPTH; c++)
-    {
-        INPUT_BUFFER_HEIGHT:
-        for(int i = 0; i < IN_BUF_HEIGHT; i++)
+    INPUT_BUFFER_DEPTH:  for(int c = 0; c < IN_BUF_DEPTH; c++)  {
+    INPUT_BUFFER_HEIGHT: for(int i = 0; i < IN_BUF_HEIGHT; i++) {
+    INPUT_BUFFER_WIDTH:  for(int j = 0; j < IN_BUF_WIDTH; j++)  {
+        // TODO: Handle border features here
+        //
+        // Hint: Either load 0 or input feature into
+        //       the buffer based on border conditions
+
+        int idx_h = height_offset + i - P;
+        int idx_w = width_offset + j - P;
+
+        if ((idx_h < 0 || idx_h >= IN_FM_HEIGHT) ||
+            (idx_w < 0 || idx_w >= IN_FM_WIDTH))
         {
-            INPUT_BUFFER_WIDTH:
-            for(int j = 0; j < IN_BUF_WIDTH; j++)
-            {
-                // TODO: Handle border features here
-                //
-                // Hint: Either load 0 or input feature into
-                //       the buffer based on border conditions
-
-                int idx_h = height_offset + i - P;
-                int idx_w = width_offset + j - P;
-
-                if ((idx_h < 0 || idx_h >= IN_FM_HEIGHT) ||
-                    (idx_w < 0 || idx_w >= IN_FM_WIDTH))
-                {
-                    in_fm_buf[c][i][j] = (fm_t) 0;
-                }
-                else
-                {
-                    in_fm_buf[c][i][j] = in_fm[c][idx_h][idx_w];
-                }
-            }
+            in_fm_buf[c][i][j] = (fm_t) 0;
         }
-    }
+        else
+        {
+            in_fm_buf[c][i][j] = in_fm[c][idx_h][idx_w];
+        }
+    }}}
 }
 
 //--------------------------------------------------------------------------
@@ -76,27 +68,14 @@ void load_layer_params_from_DRAM (
 {
     const int kernel_offset  = kernel_group * OUT_BUF_DEPTH;
 
-    WEIGHT_KERNEL_NUM:
-    for(int f = 0; f < OUT_BUF_DEPTH; f++)
-    {
-        WEIGHT_KERNEL_DEPTH:
-        for(int c = 0; c < IN_BUF_DEPTH; c++)
-        {
-            WEIGHT_KERNEL_HEIGHT:
-            for(int kh = 0; kh < 7; kh++)
-	        {
-                WEIGHT_KERNEL_WIDTH:
-	            for(int kw = 0; kw < 7; kw++)
-	            {
-	                weight_buf[f][c][kh][kw] = weights[kernel_offset + f][c][kh][kw];
-                }
-            }
-        }
-    }
+    WEIGHT_KERNEL_NUM:    for(int f = 0; f < OUT_BUF_DEPTH; f++) {
+    WEIGHT_KERNEL_HEIGHT: for(int kh = 0; kh < 7; kh++)          {
+    WEIGHT_KERNEL_WIDTH:  for(int kw = 0; kw < 7; kw++)          {
+    WEIGHT_KERNEL_DEPTH:  for(int c = 0; c < IN_BUF_DEPTH; c++)  {
+        weight_buf[f][c][kh][kw] = weights[kernel_offset + f][c][kh][kw];
+    }}}}
 
-    BIAS:
-    for(int f = 0; f < OUT_BUF_DEPTH; f++)
-    {
+    BIAS: for(int f = 0; f < OUT_BUF_DEPTH; f++) {
         bias_buf[f] = bias[kernel_offset + f];
     }
 
