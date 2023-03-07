@@ -23,6 +23,8 @@ void conv_7x7 (
 // TODO: Your code for Part C goes here.
 //---------------------------------------------------------------------------
 
+    #pragma HLS inline off
+
     // Parallelism across output depth (complete)
     #pragma HLS ARRAY_RESHAPE variable=W_buf type=complete dim=1
     #pragma HLS ARRAY_RESHAPE variable=B_buf type=complete dim=1

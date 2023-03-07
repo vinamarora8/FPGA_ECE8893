@@ -24,6 +24,8 @@ void load_input_tile_block_from_DRAM (
     int  tj
 )
 {
+    #pragma HLS inline off
+
     const int height_offset = ti * TILE_HEIGHT;
     const int width_offset  = tj * TILE_WIDTH;
 
@@ -66,6 +68,8 @@ void load_layer_params_from_DRAM (
     int  kernel_group
 )
 {
+    #pragma HLS inline off
+
     const int kernel_offset  = kernel_group * OUT_BUF_DEPTH;
 
     WEIGHT_KERNEL_NUM:    for(int f = 0; f < OUT_BUF_DEPTH; f++) {
@@ -97,6 +101,7 @@ void store_output_tile_to_DRAM (
     int  kernel_group
 )
 {
+    #pragma HLS inline off
 
     const int depth_offset  = kernel_group * OUT_BUF_DEPTH;
     const int height_offset = ti * OUT_BUF_HEIGHT;
