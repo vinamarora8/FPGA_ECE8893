@@ -33,7 +33,7 @@ void tiled_conv (
     // On-chip buffers
     // You should NOT modify the buffer dimensions!
     //--------------------------------------------------------------------------
-#define DOUBLE_BUFFER 0
+#define DOUBLE_BUFFER 1
 
 #if !DOUBLE_BUFFER
     fm_t conv_in_buf[IN_BUF_DEPTH][IN_BUF_HEIGHT][IN_BUF_WIDTH];
@@ -81,50 +81,31 @@ void tiled_conv (
                                         layer_bias, 0);
 
             KERNEL_GRP:
-            for (int tk = 0; tk < kernel_groups; tk++)
+            for (int tk = 0; tk < kernel_groups-1; tk++)
             {
-                #pragma HLS unroll factor=1
+                #pragma HLS dependence variable=conv_in_buf type=inter false
 
                 if ((tk & 1) == 0)
                 {
-                    #pragma HLS dependence variable=conv_in_buf type=intra false
-                    #pragma HLS dependence variable=conv_out_buf0 type=intra false
-                    #pragma HLS dependence variable=conv_wt_buf0 type=intra false
-                    #pragma HLS dependence variable=conv_bias_buf0 type=intra false
-
-                    #pragma HLS dependence variable=conv_out_buf1  type=intra false
-                    #pragma HLS dependence variable=conv_wt_buf1   type=intra false
-                    #pragma HLS dependence variable=conv_bias_buf1 type=intra false
-
-                    #pragma HLS dependence variable=layer_weights type=intra false
-                    #pragma HLS dependence variable=layer_bias type=intra false
-                    #pragma HLS dependence variable=layer_bias type=intra false
-
                     conv_7x7(conv_out_buf0, conv_in_buf, conv_wt_buf0, conv_bias_buf0);
+                    store_output_tile_to_DRAM(output_feature_map, conv_out_buf0, ti, tj, tk);
 
-                    if (tk != 0)
-                      store_output_tile_to_DRAM(output_feature_map, conv_out_buf1, ti, tj, tk-1);
-
-                    if (tk != kernel_groups-1)
-                      load_layer_params_from_DRAM(conv_wt_buf1, conv_bias_buf1, layer_weights,
-                                                  layer_bias, tk+1);
+                    load_layer_params_from_DRAM(conv_wt_buf1, conv_bias_buf1, layer_weights,
+                                                layer_bias, tk+1);
                 }
                 else
                 {
 
                     conv_7x7(conv_out_buf1, conv_in_buf, conv_wt_buf1, conv_bias_buf1);
+                    store_output_tile_to_DRAM(output_feature_map, conv_out_buf1, ti, tj, tk);
 
-                    if (tk != 0)
-                      store_output_tile_to_DRAM(output_feature_map, conv_out_buf0, ti, tj, tk-1);
-
-                    if (tk != kernel_groups-1)
-                      load_layer_params_from_DRAM(conv_wt_buf0, conv_bias_buf0, layer_weights,
-                                                  layer_bias, tk+1);
+                    load_layer_params_from_DRAM(conv_wt_buf0, conv_bias_buf0, layer_weights,
+                                                layer_bias, tk+1);
                 }
-
 
             }
 
+            conv_7x7(conv_out_buf1, conv_in_buf, conv_wt_buf1, conv_bias_buf1);
             store_output_tile_to_DRAM(output_feature_map, conv_out_buf1, ti, tj, kernel_groups-1);
 #endif
 
