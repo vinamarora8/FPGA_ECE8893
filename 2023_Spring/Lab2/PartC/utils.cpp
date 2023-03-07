@@ -9,6 +9,7 @@
 //              for your implementation.
 ///////////////////////////////////////////////////////////////////////////////
 #include "utils.h"
+#include "ap_fixed.h"
 
 //--------------------------------------------------------------------------
 // Function to load an input tile block from from off-chip DRAM
@@ -108,12 +109,13 @@ void store_output_tile_to_DRAM (
     const int height_offset = ti * OUT_BUF_HEIGHT;
     const int width_offset  = tj * OUT_BUF_WIDTH;
 
-    OUTPUT_BUFFER_HEIGHT: for(int i = 0; i < OUT_BUF_HEIGHT; i++) {
-        #pragma HLS unroll factor=2
     OUTPUT_BUFFER_WIDTH: for(int j = 0; j < OUT_BUF_WIDTH; j++) {
-        #pragma HLS unroll
+        //#pragma HLS pipeline II=184 // 23 * 4 * 2, to avoid II violation
+        //#pragma HLS unroll factor=2
+    OUTPUT_BUFFER_HEIGHT: for(int i = 0; i < OUT_BUF_HEIGHT; i++) {
+        //#pragma HLS unroll
     OUTPUT_BUFFER_DEPTH: for(int f = 0; f < OUT_BUF_DEPTH; f++) {
-        #pragma HLS unroll
+        //#pragma HLS unroll
         // ReLU in-place
         if(out_fm_buf[f][i][j] < (fm_t) 0)
         {

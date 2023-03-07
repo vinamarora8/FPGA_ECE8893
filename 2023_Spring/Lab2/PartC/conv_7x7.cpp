@@ -31,8 +31,8 @@ void conv_7x7 (
     #pragma HLS ARRAY_RESHAPE variable=Y_buf type=complete dim=1
 
     // Parallelism across output width (complete)
-    #pragma HLS ARRAY_PARTITION variable=X_buf type=block  factor=23 dim=3
-    #pragma HLS ARRAY_PARTITION variable=Y_buf type=cyclic factor=20 dim=3
+    #pragma HLS ARRAY_PARTITION variable=X_buf type=block  factor=26 dim=2
+    #pragma HLS ARRAY_PARTITION variable=Y_buf type=cyclic factor=23 dim=2
 
     // Parallelism across kernel width
     //#pragma HLS ARRAY_PARTITION variable=W_buf type=cyclic factor=2 dim=4
@@ -41,16 +41,16 @@ void conv_7x7 (
     //#pragma HLS ARRAY_RESHAPE   variable=X_buf type=cyclic factor=2 dim=2
 
     // Parallelism across output height
-    //#pragma HLS ARRAY_RESHAPE   variable=X_buf type=cyclic factor=2 dim=2
-    //#pragma HLS ARRAY_PARTITION variable=Y_buf type=cyclic factor=2 dim=2
+    #pragma HLS ARRAY_RESHAPE   variable=X_buf type=cyclic factor=4 dim=2
+    #pragma HLS ARRAY_PARTITION variable=Y_buf type=cyclic factor=2 dim=2
 
 
     const int S = STRIDE;
 
     // Bias copy
-    BIAS_ROW:  for (int h = 0; h < OUT_BUF_HEIGHT; h++) {
-    #pragma HLS unroll factor=2
     BIAS_COL:  for (int w = 0; w < OUT_BUF_WIDTH ; w++) {
+    #pragma HLS unroll factor=2 // 2 port memory
+    BIAS_ROW:  for (int h = 0; h < OUT_BUF_HEIGHT; h++) {
     #pragma HLS unroll
     BIAS_FEAT: for (int f = 0; f < OUT_BUF_DEPTH ; f++) {
     #pragma HLS unroll
@@ -58,18 +58,22 @@ void conv_7x7 (
     }}}
 
 
-    OUT_ROW:  for (int oh = 0; oh < OUT_BUF_HEIGHT; oh++)  { // it: 23
+    OUT_COL:  for (int ow = 0; ow < OUT_BUF_WIDTH ; ow+=2) { // it: 20
+    IN_FEAT:  for (int id = 0; id < IN_BUF_DEPTH  ; id++)  { // it: 3
     IN_ROW:   for (int kh = 0; kh < KERNEL_HEIGHT ; kh++)  { // it: 7
     IN_COL:   for (int kw = 0; kw < KERNEL_WIDTH  ; kw++)  { // it: 4
-    IN_FEAT:  for (int id = 0; id < IN_BUF_DEPTH  ; id++)  { // it: 3
-    #pragma HLS flatten
+    #pragma HLS loop_flatten
     #pragma HLS unroll factor=1
     #pragma HLS pipeline II=1
-    OUT_COL:  for (int ow = 0; ow < OUT_BUF_WIDTH ; ow++) { // it: 20
+    OUT_ROW:  for (int oh = 0; oh < OUT_BUF_HEIGHT; oh++)  { // it: 23
     #pragma HLS unroll
     OUT_FEAT: for (int of = 0; of < OUT_BUF_DEPTH ; of++) {
     #pragma HLS unroll
 
+    Y_buf[of][oh][ow]   += W_buf[of][id][kh][kw] * X_buf[id][S*oh + kh][S*ow + kw];
+    Y_buf[of][oh][ow+1] += W_buf[of][id][kh][kw] * X_buf[id][S*oh + kh][S*(ow+1) + kw];
+
+    /*
     fm_t wt_0, wt_1, wt_2, wt_3;
     fm_t in_0, in_1, in_2, in_3;
     wt_0 = wt_1 = wt_2 = wt_3 = (fm_t) 0;
@@ -77,6 +81,7 @@ void conv_7x7 (
 
     wt_0 = W_buf[of][id][kh][kw];
     in_0 = X_buf[id][S*oh + kh][S*ow + kw];
+    */
 
     /*
     if (kw < 6) {
@@ -97,7 +102,7 @@ void conv_7x7 (
     }
     */
 
-    Y_buf[of][oh][ow] += (in_0 * wt_0) + (in_1 * wt_1) + (in_2 * wt_2) + (in_3 * wt_3);
+    //Y_buf[of][oh][ow] += (in_0 * wt_0) + (in_1 * wt_1) + (in_2 * wt_2) + (in_3 * wt_3);
 
     }}}}}}
 }
