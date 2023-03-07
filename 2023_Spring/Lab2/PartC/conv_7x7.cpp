@@ -41,8 +41,8 @@ void conv_7x7 (
     //#pragma HLS ARRAY_RESHAPE   variable=X_buf type=cyclic factor=2 dim=2
 
     // Parallelism across output height
-    #pragma HLS ARRAY_RESHAPE   variable=X_buf type=cyclic factor=4 dim=2
-    #pragma HLS ARRAY_PARTITION variable=Y_buf type=cyclic factor=2 dim=2
+    #pragma HLS ARRAY_RESHAPE   variable=X_buf type=cyclic factor=4 dim=3
+    #pragma HLS ARRAY_PARTITION variable=Y_buf type=cyclic factor=2 dim=3
 
 
     const int S = STRIDE;
