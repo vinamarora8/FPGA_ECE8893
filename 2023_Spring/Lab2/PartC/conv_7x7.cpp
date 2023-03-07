@@ -60,7 +60,7 @@ void conv_7x7 (
 
     OUT_ROW:  for (int oh = 0; oh < OUT_BUF_HEIGHT; oh++)  { // it: 23
     IN_ROW:   for (int kh = 0; kh < KERNEL_HEIGHT ; kh++)  { // it: 7
-    IN_COL:   for (int kw = 0; kw < KERNEL_WIDTH  ; kw+=2)  { // it: 4
+    IN_COL:   for (int kw = 0; kw < KERNEL_WIDTH  ; kw++)  { // it: 4
     IN_FEAT:  for (int id = 0; id < IN_BUF_DEPTH  ; id++)  { // it: 3
     #pragma HLS flatten
     #pragma HLS unroll factor=1
