@@ -32,13 +32,13 @@ void conv_7x7 (
 
     // Parallelism across output width (complete)
     #pragma HLS ARRAY_PARTITION variable=X_buf type=block  factor=23 dim=3
-    #pragma HLS ARRAY_RESHAPE   variable=X_buf type=cyclic factor=2 dim=3
     #pragma HLS ARRAY_PARTITION variable=Y_buf type=cyclic factor=20 dim=3
 
-    // Parallelism across kernel width & height
+    // Parallelism across kernel width
     #pragma HLS ARRAY_PARTITION variable=W_buf type=cyclic factor=2 dim=4
-    #pragma HLS ARRAY_PARTITION variable=W_buf type=cyclic factor=2 dim=3
-    #pragma HLS ARRAY_RESHAPE   variable=X_buf type=cyclic factor=2 dim=2
+    #pragma HLS ARRAY_RESHAPE   variable=X_buf type=cyclic factor=2 dim=3
+    //#pragma HLS ARRAY_PARTITION variable=W_buf type=cyclic factor=2 dim=3
+    //#pragma HLS ARRAY_RESHAPE   variable=X_buf type=cyclic factor=2 dim=2
 
     // Parallelism across output height
     //#pragma HLS ARRAY_RESHAPE   variable=X_buf type=cyclic factor=2 dim=2
@@ -56,10 +56,11 @@ void conv_7x7 (
     }}}
 
 
-    IN_ROW:   for (int kh = 0; kh < KERNEL_HEIGHT ; kh+=2)  { // it: 4
+    IN_ROW:   for (int kh = 0; kh < KERNEL_HEIGHT ; kh++)  { // it: 4
     IN_COL:   for (int kw = 0; kw < KERNEL_WIDTH  ; kw+=2)  { // it: 4
     IN_FEAT:  for (int id = 0; id < IN_BUF_DEPTH  ; id++)  { // it: 3
     OUT_ROW:  for (int oh = 0; oh < OUT_BUF_HEIGHT; oh++)  { // it: 23
+    #pragma HLS flatten
     #pragma HLS unroll factor=1
     OUT_COL:  for (int ow = 0; ow < OUT_BUF_WIDTH ; ow++) { // it: 20
     #pragma HLS unroll
@@ -79,6 +80,7 @@ void conv_7x7 (
         in_1 = X_buf[id][S*oh + kh][S*ow + kw+1];
     }
 
+    /*
     if (kh < 6) {
         wt_2 = W_buf[of][id][kh+1][kw];
         in_2 = X_buf[id][S*oh + kh+1][S*ow + kw];
@@ -88,6 +90,7 @@ void conv_7x7 (
         wt_3 = W_buf[of][id][kh+1][kw+1];
         in_3 = X_buf[id][S*oh + kh+1][S*ow + kw+1];
     }
+    */
 
     Y_buf[of][oh][ow] += (in_0 * wt_0) + (in_1 * wt_1) + (in_2 * wt_2) + (in_3 * wt_3);
 
