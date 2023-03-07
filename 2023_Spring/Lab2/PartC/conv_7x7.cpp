@@ -35,33 +35,36 @@ void conv_7x7 (
     #pragma HLS ARRAY_PARTITION variable=Y_buf type=cyclic factor=20 dim=3
 
     // Parallelism across kernel width
-    #pragma HLS ARRAY_PARTITION variable=W_buf type=cyclic factor=2 dim=4
-    #pragma HLS ARRAY_RESHAPE   variable=X_buf type=cyclic factor=2 dim=3
+    //#pragma HLS ARRAY_PARTITION variable=W_buf type=cyclic factor=2 dim=4
+    //#pragma HLS ARRAY_RESHAPE   variable=X_buf type=cyclic factor=2 dim=3
     //#pragma HLS ARRAY_PARTITION variable=W_buf type=cyclic factor=2 dim=3
     //#pragma HLS ARRAY_RESHAPE   variable=X_buf type=cyclic factor=2 dim=2
 
     // Parallelism across output height
     //#pragma HLS ARRAY_RESHAPE   variable=X_buf type=cyclic factor=2 dim=2
-    //#pragma HLS ARRAY_PARTITION variable=Y_buf type=cyclic factor=2 dim=1
+    //#pragma HLS ARRAY_PARTITION variable=Y_buf type=cyclic factor=2 dim=2
 
 
     const int S = STRIDE;
 
     // Bias copy
     BIAS_ROW:  for (int h = 0; h < OUT_BUF_HEIGHT; h++) {
+    #pragma HLS unroll factor=2
     BIAS_COL:  for (int w = 0; w < OUT_BUF_WIDTH ; w++) {
+    #pragma HLS unroll
     BIAS_FEAT: for (int f = 0; f < OUT_BUF_DEPTH ; f++) {
     #pragma HLS unroll
           Y_buf[f][h][w] = (fm_t) B_buf[f];
     }}}
 
 
-    IN_ROW:   for (int kh = 0; kh < KERNEL_HEIGHT ; kh++)  { // it: 4
+    OUT_ROW:  for (int oh = 0; oh < OUT_BUF_HEIGHT; oh++)  { // it: 23
+    IN_ROW:   for (int kh = 0; kh < KERNEL_HEIGHT ; kh++)  { // it: 7
     IN_COL:   for (int kw = 0; kw < KERNEL_WIDTH  ; kw+=2)  { // it: 4
     IN_FEAT:  for (int id = 0; id < IN_BUF_DEPTH  ; id++)  { // it: 3
-    OUT_ROW:  for (int oh = 0; oh < OUT_BUF_HEIGHT; oh++)  { // it: 23
     #pragma HLS flatten
     #pragma HLS unroll factor=1
+    #pragma HLS pipeline II=1
     OUT_COL:  for (int ow = 0; ow < OUT_BUF_WIDTH ; ow++) { // it: 20
     #pragma HLS unroll
     OUT_FEAT: for (int of = 0; of < OUT_BUF_DEPTH ; of++) {
@@ -75,10 +78,12 @@ void conv_7x7 (
     wt_0 = W_buf[of][id][kh][kw];
     in_0 = X_buf[id][S*oh + kh][S*ow + kw];
 
+    /*
     if (kw < 6) {
         wt_1 = W_buf[of][id][kh][kw+1];
         in_1 = X_buf[id][S*oh + kh][S*ow + kw+1];
     }
+    */
 
     /*
     if (kh < 6) {
