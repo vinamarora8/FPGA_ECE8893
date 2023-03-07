@@ -80,6 +80,7 @@ void load_layer_params_from_DRAM (
     }}}}
 
     BIAS: for(int f = 0; f < OUT_BUF_DEPTH; f++) {
+        #pragma HLS unroll
         bias_buf[f] = bias[kernel_offset + f];
     }
 
@@ -108,6 +109,7 @@ void store_output_tile_to_DRAM (
     const int width_offset  = tj * OUT_BUF_WIDTH;
 
     OUTPUT_BUFFER_HEIGHT: for(int i = 0; i < OUT_BUF_HEIGHT; i++) {
+        #pragma HLS unroll factor=2
     OUTPUT_BUFFER_WIDTH: for(int j = 0; j < OUT_BUF_WIDTH; j++) {
         #pragma HLS unroll
     OUTPUT_BUFFER_DEPTH: for(int f = 0; f < OUT_BUF_DEPTH; f++) {
