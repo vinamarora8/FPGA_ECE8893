@@ -9,7 +9,6 @@
 //              for your implementation.
 ///////////////////////////////////////////////////////////////////////////////
 #include "utils.h"
-#include "ap_fixed.h"
 
 //--------------------------------------------------------------------------
 // Function to load an input tile block from from off-chip DRAM
@@ -35,11 +34,6 @@ void load_input_tile_block_from_DRAM (
     INPUT_BUFFER_DEPTH:  for(int c = 0; c < IN_BUF_DEPTH; c++)  {
     INPUT_BUFFER_HEIGHT: for(int i = 0; i < IN_BUF_HEIGHT; i++) {
     INPUT_BUFFER_WIDTH:  for(int j = 0; j < IN_BUF_WIDTH; j++)  {
-        // TODO: Handle border features here
-        //
-        // Hint: Either load 0 or input feature into
-        //       the buffer based on border conditions
-
         int idx_h = height_offset + i - P;
         int idx_w = width_offset + j - P;
 
@@ -110,12 +104,8 @@ void store_output_tile_to_DRAM (
     const int width_offset  = tj * OUT_BUF_WIDTH;
 
     OUTPUT_BUFFER_WIDTH: for(int j = 0; j < OUT_BUF_WIDTH; j++) {
-        //#pragma HLS pipeline II=184 // 23 * 4 * 2, to avoid II violation
-        //#pragma HLS unroll factor=2
     OUTPUT_BUFFER_HEIGHT: for(int i = 0; i < OUT_BUF_HEIGHT; i++) {
-        //#pragma HLS unroll
     OUTPUT_BUFFER_DEPTH: for(int f = 0; f < OUT_BUF_DEPTH; f++) {
-        //#pragma HLS unroll
         // ReLU in-place
         if(out_fm_buf[f][i][j] < (fm_t) 0)
         {

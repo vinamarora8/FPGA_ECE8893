@@ -33,28 +33,21 @@ void tiled_conv (
     // On-chip buffers
     // You should NOT modify the buffer dimensions!
     //--------------------------------------------------------------------------
-#define DOUBLE_BUFFER 1
+    fm_t conv_in_buf[IN_BUF_DEPTH][IN_BUF_HEIGHT][IN_BUF_WIDTH];
 
-#if !DOUBLE_BUFFER
-    fm_t conv_in_buf[IN_BUF_DEPTH][IN_BUF_HEIGHT][IN_BUF_WIDTH];
-    wt_t conv_wt_buf[OUT_BUF_DEPTH][IN_BUF_DEPTH][KERNEL_HEIGHT][KERNEL_WIDTH];
-    wt_t conv_bias_buf[OUT_BUF_DEPTH];
-    fm_t conv_out_buf[OUT_BUF_DEPTH][OUT_BUF_HEIGHT][OUT_BUF_WIDTH];
-#else
-    fm_t conv_in_buf[IN_BUF_DEPTH][IN_BUF_HEIGHT][IN_BUF_WIDTH];
+    // Parameters and output buffers double-buffered
     wt_t conv_wt_buf0[OUT_BUF_DEPTH][IN_BUF_DEPTH][KERNEL_HEIGHT][KERNEL_WIDTH];
-    wt_t conv_wt_buf1[OUT_BUF_DEPTH][IN_BUF_DEPTH][KERNEL_HEIGHT][KERNEL_WIDTH];
     wt_t conv_bias_buf0[OUT_BUF_DEPTH];
-    wt_t conv_bias_buf1[OUT_BUF_DEPTH];
     fm_t conv_out_buf0[OUT_BUF_DEPTH][OUT_BUF_HEIGHT][OUT_BUF_WIDTH];
+    wt_t conv_wt_buf1[OUT_BUF_DEPTH][IN_BUF_DEPTH][KERNEL_HEIGHT][KERNEL_WIDTH];
+    wt_t conv_bias_buf1[OUT_BUF_DEPTH];
     fm_t conv_out_buf1[OUT_BUF_DEPTH][OUT_BUF_HEIGHT][OUT_BUF_WIDTH];
-#endif
-
-    const int kernel_groups = OUT_FM_DEPTH / OUT_BUF_DEPTH;
 
     //--------------------------------------------------------------------------
     // Process each tile iteratively
     //--------------------------------------------------------------------------
+    const int kernel_groups = OUT_FM_DEPTH / OUT_BUF_DEPTH;
+
     TILE_ROW:
     for(int ti = 0; ti < N_TILE_ROWS; ti++)
     {
