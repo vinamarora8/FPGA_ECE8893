@@ -2,3 +2,7 @@ result
 *.log
 *proj/
 reports/
+*.o
+*.d
+*.swp
+*.out
