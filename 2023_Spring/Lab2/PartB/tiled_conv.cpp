@@ -62,12 +62,13 @@ void tiled_conv (
 
             const int kernel_groups = OUT_FM_DEPTH / OUT_BUF_DEPTH;
 
+            load_input_tile_block_from_DRAM(conv_in_buf,
+                                            input_feature_map,
+                                            ti, tj);
+
             KERNEL_GRP:
             for (int tk = 0; tk < kernel_groups; tk++)
             {
-                load_input_tile_block_from_DRAM(conv_in_buf,
-                                                input_feature_map,
-                                                ti, tj);
 
                 load_layer_params_from_DRAM(conv_wt_buf,
                                             conv_bias_buf,
